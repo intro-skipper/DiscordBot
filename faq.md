@@ -30,17 +30,33 @@ Intro Skipper is a Jellyfin plugin that automatically detects and skips intro an
 ## Why are no intros being detected?
 
 - Make sure jellyfin-ffmpeg is installed (not regular ffmpeg)
-- Run the "Detect Introductions" scheduled task
+- Run the "Detect and Analyze Media Segments" scheduled task
 - Check that you have at least 2 episodes in a season (chromaprint needs multiple files to compare)
 - Verify the intro is between 15 seconds and 2 minutes long
 - Check the intro is within the first 25% of the episode or first 10 minutes
+- If you migrated from an older version, try erasing all fingerprints in plugin settings and rescan
 
 ## Why is the skip button not visible?
 
-- As of Jellyfin 10.10+, Intro Skipper does NOT modify the UI directly
+**For Jellyfin 10.10+:**
+
+- Intro Skipper does NOT modify the UI directly anymore
 - Use Jellyfin's native skip button in player settings
 - For additional UI features, install the File Transformation plugin
-- Make sure timestamps were detected for the episode
+
+## Why does Jellyfin not start after updating?
+
+- This can happen when updating to a new major Jellyfin version with an old plugin
+- Remove the Intro Skipper plugin folder manually from `/config/plugins/`
+- Start Jellyfin and reinstall the plugin from the catalog
+- If using Docker, make sure to use the correct manifest URL for your Jellyfin version
+
+## Why is scanning using too much RAM?
+
+- Reduce "Max degree of parallelism" to 1 in plugin settings
+- Set ffmpeg priority to "Below Normal"
+- Lower thread count in analysis settings
+- Large libraries with many episodes will naturally use more RAM during scanning
 
 ## What detection methods does Intro Skipper use?
 
@@ -62,18 +78,20 @@ Intro Skipper is a Jellyfin plugin that automatically detects and skips intro an
 - Look at the Jellyfin logs for specific error messages
 - Verify file permissions on your media library
 - Make sure the plugin is the latest version
+- Try running a full library scan first
 
-## How do I fix SQLite errors?
+## How do I fix SQLite/database errors?
 
 - Stop Jellyfin
-- Delete the intro-skipper database file in the plugin data folder
+- Delete the intro-skipper database file in `/config/data/introskipper`
+- Also delete any cache files in `/cache/introskipper` if they exist
 - Restart Jellyfin and run detection again
 
 ## Why are plugin settings not being saved?
 
 - Make sure you click Save after changing settings
 - Check browser console for JavaScript errors
-- Try a different browser or clear cache
+- Try a different browser or clear cache (CTRL + F5)
 - Verify Jellyfin has write permissions to config directory
 
 ## Why do I see two skip buttons in Jellyfin Media Player?
@@ -87,10 +105,18 @@ No, SyncPlay is not compatible with any method of skipping due to how clients ar
 
 ## How do I edit timestamps manually?
 
-Go to the plugin settings, find the show/episode, and you can manually adjust the intro start and end times. Note that manual edits may be overwritten if you run detection again.
+Go to the plugin settings "Manage Fingerprints" section, find the show/episode, and you can manually adjust the intro start and end times. Note that manual edits may be overwritten if you run detection again.
+
+## How do I completely reset Intro Skipper?
+
+1. Remove all Intro Skipper plugins from Jellyfin's My Plugins page
+2. Delete `/config/plugins/configurations/IntroSkipper.xml`
+3. Delete `/config/data/introskipper` directory
+4. Delete any cache files in `/cache/introskipper`
+5. Restart Jellyfin and reinstall the plugin fresh
 
 ## Where can I get more help?
 
-- Wiki: https://github.com/intro-skipper/intro-skipper/wiki
-- GitHub Issues: https://github.com/intro-skipper/intro-skipper/issues
-- GitHub Discussions: https://github.com/intro-skipper/intro-skipper/discussions
+- Wiki: <https://github.com/intro-skipper/intro-skipper/wiki>
+- GitHub Issues: <https://github.com/intro-skipper/intro-skipper/issues>
+- GitHub Discussions: <https://github.com/intro-skipper/intro-skipper/discussions>
