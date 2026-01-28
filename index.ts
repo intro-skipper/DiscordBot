@@ -2,7 +2,7 @@ import {
   Client,
   Events,
   GatewayIntentBits,
-  codeBlock,
+  inlineCode,
   type ChatInputCommandInteraction,
   type Message,
 } from "discord.js";
@@ -12,9 +12,9 @@ import { getSupportedVersions, formatSupportedVersions } from "./versions";
 // Channel name to listen for direct questions
 const SUPPORT_CHANNEL_NAME = "🤖support-bot";
 
-// Wrap URLs in code blocks to suppress Discord embeds
+// Wrap URLs in inline code to suppress Discord embeds
 function suppressEmbeds(text: string): string {
-  return text.replace(/(https?:\/\/[^\s<>]+)/g, (url) => codeBlock(url));
+  return text.replace(/(https?:\/\/[^\s<>]+)/g, (url) => inlineCode(url));
 }
 
 // Load FAQ content at startup
