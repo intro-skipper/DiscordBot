@@ -1,5 +1,5 @@
 import { Client, Events, GatewayIntentBits, type ChatInputCommandInteraction } from "discord.js";
-import { askFAQ } from "./services/kilo";
+import { askFAQ } from "./kilo";
 
 // Load FAQ content at startup
 const faqContent = await Bun.file("faq.md").text();
