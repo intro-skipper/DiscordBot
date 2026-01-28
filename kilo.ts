@@ -1,5 +1,6 @@
 const KILO_API_KEY = process.env.KILO_API_KEY;
 const KILO_API_URL = "https://api.kilo.ai/api/openrouter/chat/completions";
+const KILO_MODEL = process.env.KILO_MODEL ?? "minimax/minimax-m2.1:free";
 
 interface KiloResponse {
   choices: {
@@ -36,7 +37,7 @@ ${faqContent}`;
       "X-Title": "Intro Skipper Support Bot",
     },
     body: JSON.stringify({
-      model: "corethink:free",
+      model: KILO_MODEL,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userQuestion },
