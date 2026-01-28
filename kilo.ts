@@ -16,6 +16,13 @@ interface KiloModel {
   name: string;
 }
 
+interface KiloModelWithPricing extends KiloModel {
+  pricing?: {
+    prompt: string;
+    completion: string;
+  };
+}
+
 async function getFreeModel(): Promise<string | null> {
   try {
     const response = await fetch(KILO_MODELS_URL, {
@@ -26,10 +33,21 @@ async function getFreeModel(): Promise<string | null> {
 
     if (!response.ok) return null;
 
-    const data = (await response.json()) as { data: KiloModel[] };
+    const data = (await response.json()) as { data: KiloModelWithPricing[] };
     const models = data.data ?? [];
+
+    // First, try to find a model ending with :free
     const freeModel = models.find((model) => model.id.endsWith(":free"));
-    return freeModel?.id ?? null;
+    if (freeModel) return freeModel.id;
+
+    // Fallback: find a model with zero pricing
+    const zeroPricingModel = models.find(
+      (model) =>
+        model.pricing &&
+        parseFloat(model.pricing.prompt) === 0 &&
+        parseFloat(model.pricing.completion) === 0
+    );
+    return zeroPricingModel?.id ?? null;
   } catch {
     return null;
   }
