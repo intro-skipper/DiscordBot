@@ -3,7 +3,7 @@ name: Deploy Images to GHCR
 on:
   push:
     branches:
-      - bun
+      - main
   workflow_dispatch:
 
 permissions:
