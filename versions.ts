@@ -84,7 +84,9 @@ export function formatSupportedVersions(versions: SupportedVersion[]): string {
       month: "short",
       day: "numeric",
     });
-    return `- **Jellyfin ${v.jellyfinVersion}**: Requires ${v.targetAbi}+ (Plugin v${v.pluginVersion}, updated ${date})`;
+    // Remove trailing .0 from version (e.g., 10.11.6.0 -> 10.11.6)
+    const targetAbi = v.targetAbi.replace(/\.0$/, "");
+    return `- **Jellyfin ${v.jellyfinVersion}**: Requires ${targetAbi}+ (Plugin v${v.pluginVersion}, updated ${date})`;
   });
 
   return lines.join("\n");
