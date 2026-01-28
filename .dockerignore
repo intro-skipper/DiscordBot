@@ -2,3 +2,4 @@
 !*.ts
 !package*.json
 !bun.lock
+!faq.md
