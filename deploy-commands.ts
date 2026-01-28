@@ -21,6 +21,9 @@ const commands = [
       option.setName("question").setDescription("Your question").setRequired(true)
     ),
   new SlashCommandBuilder()
+    .setName("versions")
+    .setDescription("Show supported Jellyfin versions for Intro Skipper"),
+  new SlashCommandBuilder()
     .setName("help")
     .setDescription("Show help information about the Intro Skipper support bot"),
 ].map((command) => command.toJSON());

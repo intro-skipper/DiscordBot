@@ -6,6 +6,7 @@ import {
   type Message,
 } from "discord.js";
 import { askFAQ } from "./kilo";
+import { getSupportedVersions, formatSupportedVersions } from "./versions";
 
 // Channel name to listen for direct questions
 const SUPPORT_CHANNEL_NAME = "🤖support-bot";
@@ -44,6 +45,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
     await handleAskCommand(interaction);
   } else if (commandName === "help") {
     await handleHelpCommand(interaction);
+  } else if (commandName === "versions") {
+    await handleVersionsCommand(interaction);
   }
 });
 
@@ -111,6 +114,29 @@ async function handleAskCommand(interaction: ChatInputCommandInteraction) {
   }
 }
 
+async function handleVersionsCommand(interaction: ChatInputCommandInteraction) {
+  await interaction.deferReply();
+
+  try {
+    const versions = await getSupportedVersions();
+    const versionInfo = formatSupportedVersions(versions);
+
+    const message = `# 📦 Supported Jellyfin Versions
+
+${versionInfo}
+
+**Note:** Make sure you're using the correct manifest URL for your Jellyfin version:
+- \`https://intro-skipper.org/manifest.json\` (auto-detects your version)`;
+
+    await interaction.editReply(message);
+  } catch (error) {
+    console.error("Error fetching versions:", error);
+    await interaction.editReply(
+      "❌ Sorry, I couldn't fetch the version information. Please check <https://github.com/intro-skipper/intro-skipper> for the latest requirements."
+    );
+  }
+}
+
 async function handleHelpCommand(interaction: ChatInputCommandInteraction) {
   const helpMessage = `# Intro Skipper Support Bot 🎬
 
@@ -118,6 +144,7 @@ I'm here to help answer your questions about the Intro Skipper plugin for Jellyf
 
 ## Commands
 - \`/ask <question>\` - Ask me anything about Intro Skipper
+- \`/versions\` - Show supported Jellyfin versions
 - \`/help\` - Show this help message
 
 ## Examples

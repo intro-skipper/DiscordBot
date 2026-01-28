@@ -14,7 +14,7 @@ Intro Skipper is a Jellyfin plugin that automatically detects and skips intro an
 
 ## What are the system requirements?
 
-- Jellyfin 10.11.6 or newer
+- Jellyfin server with a supported version (see supported versions)
 - Jellyfin's fork of ffmpeg version 7.1.1-7 or newer
 - For Docker (jellyfin/jellyfin or linuxserver/jellyfin): ffmpeg is preinstalled
 - For Debian/Ubuntu: Install the `jellyfin-ffmpeg7` package
@@ -24,7 +24,7 @@ Intro Skipper is a Jellyfin plugin that automatically detects and skips intro an
 
 - Wait up to 30 minutes after adding the repository
 - Make sure you're using the correct URL: `https://intro-skipper.org/manifest.json`
-- Verify your Jellyfin version is 10.11.6 or newer
+- Check if your Jellyfin version is supported (see supported versions)
 - Try restarting Jellyfin after adding the repository
 
 ## Why are no intros being detected?
