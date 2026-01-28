@@ -22,7 +22,7 @@ Intro Skipper is a Jellyfin plugin that automatically detects and skips intro an
 
 ## Why is the plugin not showing in the catalog?
 
-- Wait up to 30 minutes after adding the repository
+- Wait up to 30 minutes after adding the repository or try CTRL + F5 to reload without cache
 - Make sure you're using the correct URL: `https://intro-skipper.org/manifest.json`
 - Check if your Jellyfin version is supported (see supported versions)
 - Try restarting Jellyfin after adding the repository
