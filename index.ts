@@ -1,6 +1,11 @@
 import { Client, Events, GatewayIntentBits, type ChatInputCommandInteraction } from "discord.js";
 import { askFAQ } from "./kilo";
 
+// Wrap URLs in angle brackets to suppress Discord embeds
+function suppressEmbeds(text: string): string {
+  return text.replace(/(https?:\/\/[^\s<>]+)/g, "<$1>");
+}
+
 // Load FAQ content at startup
 const faqContent = await Bun.file("faq.md").text();
 console.log("📚 FAQ loaded successfully");
@@ -37,12 +42,13 @@ async function handleAskCommand(interaction: ChatInputCommandInteraction) {
 
   try {
     const answer = await askFAQ(faqContent, question);
+    const response = suppressEmbeds(answer);
 
     // Discord has a 2000 character limit for messages
-    if (answer.length > 1900) {
-      await interaction.editReply(answer.substring(0, 1900) + "...\n\n*(Response truncated)*");
+    if (response.length > 1900) {
+      await interaction.editReply(response.substring(0, 1900) + "...\n\n*(Response truncated)*");
     } else {
-      await interaction.editReply(answer);
+      await interaction.editReply(response);
     }
   } catch (error) {
     console.error("Error handling ask command:", error);
@@ -67,8 +73,8 @@ I'm here to help answer your questions about the Intro Skipper plugin for Jellyf
 - \`/ask What are the system requirements?\`
 
 ## Need more help?
-- 📖 Wiki: https://github.com/intro-skipper/intro-skipper/wiki
-- 🐛 Report issues: https://github.com/intro-skipper/intro-skipper/issues`;
+- 📖 Wiki: <https://github.com/intro-skipper/intro-skipper/wiki>
+- 🐛 Report issues: <https://github.com/intro-skipper/intro-skipper/issues>`;
 
   await interaction.reply(helpMessage);
 }
