@@ -1,5 +1,14 @@
-import { Client, Events, GatewayIntentBits, type ChatInputCommandInteraction } from "discord.js";
+import {
+  Client,
+  Events,
+  GatewayIntentBits,
+  type ChatInputCommandInteraction,
+  type Message,
+} from "discord.js";
 import { askFAQ } from "./kilo";
+
+// Channel name to listen for direct questions
+const SUPPORT_CHANNEL_NAME = "🤖support-bot";
 
 // Wrap URLs in angle brackets to suppress Discord embeds
 function suppressEmbeds(text: string): string {
@@ -12,7 +21,11 @@ console.log("📚 FAQ loaded successfully");
 
 // Discord client setup
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
 });
 
 // Bot ready event
@@ -33,6 +46,46 @@ client.on(Events.InteractionCreate, async (interaction) => {
     await handleHelpCommand(interaction);
   }
 });
+
+// Handle direct messages in the support channel
+client.on(Events.MessageCreate, async (message) => {
+  // Ignore bot messages
+  if (message.author.bot) return;
+
+  // Only respond in the support channel
+  const channel = message.channel;
+  if (!("name" in channel) || channel.name !== SUPPORT_CHANNEL_NAME) return;
+
+  // Ignore empty messages or messages that are just attachments
+  const question = message.content.trim();
+  if (!question) return;
+
+  await handleChannelQuestion(message, question);
+});
+
+async function handleChannelQuestion(message: Message, question: string) {
+  try {
+    // Show typing indicator while processing
+    if ("sendTyping" in message.channel) {
+      await message.channel.sendTyping();
+    }
+
+    const answer = await askFAQ(faqContent, question);
+    const response = suppressEmbeds(answer);
+
+    // Discord has a 2000 character limit for messages
+    if (response.length > 1900) {
+      await message.reply(response.substring(0, 1900) + "...\n\n*(Response truncated)*");
+    } else {
+      await message.reply(response);
+    }
+  } catch (error) {
+    console.error("Error handling channel question:", error);
+    await message.reply(
+      "❌ Sorry, I encountered an error while processing your question. Please try again later."
+    );
+  }
+}
 
 async function handleAskCommand(interaction: ChatInputCommandInteraction) {
   const question = interaction.options.getString("question", true);
