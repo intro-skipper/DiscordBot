@@ -19,7 +19,7 @@ export async function askFAQ(faqContent: string, userQuestion: string): Promise<
 RULES:
 1. Answer questions based ONLY on the FAQ content provided
 2. If the FAQ contains a relevant answer, provide it in a friendly, concise way
-3. If no FAQ matches the question, respond with: "I don't have information about that in my FAQ. Please check the wiki at https://github.com/intro-skipper/intro-skipper/wiki or ask in our Discord: https://discord.intro-skipper.org"
+3. If no FAQ matches the question, respond with: "I don't have information about that in my FAQ. Please check the wiki at https://github.com/intro-skipper/intro-skipper/wiki or ask in the Support Channel"
 4. Do NOT make up information that isn't in the FAQ
 5. Keep responses concise and helpful
 6. Use Discord-friendly formatting (markdown works)

@@ -92,6 +92,5 @@ Go to the plugin settings, find the show/episode, and you can manually adjust th
 ## Where can I get more help?
 
 - Wiki: https://github.com/intro-skipper/intro-skipper/wiki
-- Discord: https://discord.intro-skipper.org
 - GitHub Issues: https://github.com/intro-skipper/intro-skipper/issues
 - GitHub Discussions: https://github.com/intro-skipper/intro-skipper/discussions

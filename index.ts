@@ -68,7 +68,6 @@ I'm here to help answer your questions about the Intro Skipper plugin for Jellyf
 
 ## Need more help?
 - 📖 Wiki: https://github.com/intro-skipper/intro-skipper/wiki
-- 💬 Discord: https://discord.intro-skipper.org
 - 🐛 Report issues: https://github.com/intro-skipper/intro-skipper/issues`;
 
   await interaction.reply(helpMessage);
