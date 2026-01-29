@@ -5,6 +5,11 @@ const KILO_MODEL = process.env.KILO_MODEL ?? "minimax/minimax-m2.1:free";
 
 import { getSupportedVersions, formatSupportedVersions } from "./versions";
 
+interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
 interface KiloResponse {
   choices: {
     message: {
@@ -24,6 +29,28 @@ interface KiloModelWithPricing extends KiloModel {
     completion: string;
   };
 }
+
+// Conversation history storage (channelId/uniqueId -> messages)
+const conversationHistory = new Map<string, ChatMessage[]>();
+const HISTORY_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes
+const MAX_HISTORY_MESSAGES = 10;
+
+// Track when conversations were last active
+const conversationTimestamps = new Map<string, number>();
+
+// Clean up old conversations periodically
+function cleanupOldConversations() {
+  const now = Date.now();
+  for (const [id, timestamp] of conversationTimestamps) {
+    if (now - timestamp > HISTORY_EXPIRY_MS) {
+      conversationHistory.delete(id);
+      conversationTimestamps.delete(id);
+    }
+  }
+}
+
+// Run cleanup every 10 minutes
+setInterval(cleanupOldConversations, 10 * 60 * 1000);
 
 async function getFreeModel(): Promise<string | null> {
   try {
@@ -55,7 +82,11 @@ async function getFreeModel(): Promise<string | null> {
   }
 }
 
-async function makeRequest(model: string, systemPrompt: string, userQuestion: string): Promise<Response> {
+async function makeRequest(
+  model: string,
+  systemPrompt: string,
+  history: ChatMessage[]
+): Promise<Response> {
   return fetch(KILO_API_URL, {
     method: "POST",
     headers: {
@@ -68,7 +99,7 @@ async function makeRequest(model: string, systemPrompt: string, userQuestion: st
       model,
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: userQuestion },
+        ...history,
       ],
       temperature: 0.1,
       max_tokens: 500,
@@ -76,7 +107,11 @@ async function makeRequest(model: string, systemPrompt: string, userQuestion: st
   });
 }
 
-export async function askFAQ(faqContent: string, userQuestion: string): Promise<string> {
+export async function askFAQ(
+  faqContent: string,
+  userQuestion: string,
+  conversationId?: string
+): Promise<string> {
   if (!KILO_API_KEY) {
     throw new Error("KILO_API_KEY is not set in environment variables");
   }
@@ -96,6 +131,7 @@ RULES:
 6. Keep responses concise and helpful
 7. Use Discord-friendly formatting (markdown works)
 8. When mentioning the support channel, ALWAYS use the exact format <#1308018820618649630> - never say "support channel" or any other variation
+9. You can reference previous messages in the conversation to provide context-aware follow-up answers
 
 SUPPORTED VERSIONS (LIVE DATA):
 ${versionInfo}
@@ -103,7 +139,20 @@ ${versionInfo}
 FAQ CONTENT:
 ${faqContent}`;
 
-  let response = await makeRequest(KILO_MODEL, systemPrompt, userQuestion);
+  // Get or create conversation history
+  let history: ChatMessage[] = [];
+  if (conversationId) {
+    history = conversationHistory.get(conversationId) ?? [];
+    conversationTimestamps.set(conversationId, Date.now());
+  }
+
+  // Add current question
+  history.push({ role: "user", content: userQuestion });
+
+  // Keep only recent messages to avoid token limits
+  const recentHistory = history.slice(-MAX_HISTORY_MESSAGES);
+
+  let response = await makeRequest(KILO_MODEL, systemPrompt, recentHistory);
 
   // If the model fails, try to find a free model
   if (!response.ok) {
@@ -112,7 +161,7 @@ ${faqContent}`;
 
     if (freeModel) {
       console.log(`Retrying with free model: ${freeModel}`);
-      response = await makeRequest(freeModel, systemPrompt, userQuestion);
+      response = await makeRequest(freeModel, systemPrompt, recentHistory);
     }
   }
 
@@ -122,5 +171,19 @@ ${faqContent}`;
   }
 
   const data = (await response.json()) as KiloResponse;
-  return data.choices[0]?.message?.content ?? "Sorry, I couldn't generate a response.";
+  const answer = data.choices[0]?.message?.content ?? "Sorry, I couldn't generate a response.";
+
+  // Save assistant response to history
+  if (conversationId) {
+    history.push({ role: "assistant", content: answer });
+    conversationHistory.set(conversationId, history.slice(-MAX_HISTORY_MESSAGES));
+  }
+
+  return answer;
+}
+
+// Export function to clear a conversation
+export function clearConversation(conversationId: string): void {
+  conversationHistory.delete(conversationId);
+  conversationTimestamps.delete(conversationId);
 }

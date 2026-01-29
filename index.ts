@@ -85,7 +85,9 @@ async function handleChannelQuestion(message: Message, question: string) {
       await message.channel.sendTyping();
     }
 
-    const answer = await askFAQ(faqContent, question);
+    // Use channel ID + user ID for conversation context
+    const conversationId = `${message.channelId}-${message.author.id}`;
+    const answer = await askFAQ(faqContent, question, conversationId);
     const response = suppressEmbeds(answer);
 
     // Discord has a 2000 character limit for messages
@@ -109,7 +111,9 @@ async function handleAskCommand(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
 
   try {
-    const answer = await askFAQ(faqContent, question);
+    // Use channel ID + user ID for conversation context
+    const conversationId = `${interaction.channelId}-${interaction.user.id}`;
+    const answer = await askFAQ(faqContent, question, conversationId);
     const response = suppressEmbeds(answer);
 
     // Discord has a 2000 character limit for messages
