@@ -12,9 +12,20 @@ import { getSupportedVersions, formatSupportedVersions } from "./versions";
 // Channel name to listen for direct questions
 const SUPPORT_CHANNEL_NAME = "🤖support-bot";
 
-// Wrap URLs in inline code to suppress Discord embeds
+// Wrap URLs in inline code to suppress Discord embeds, but preserve channel mentions
 function suppressEmbeds(text: string): string {
-  return text.replace(/(https?:\/\/[^\s<>]+)/g, (url) => inlineCode(url));
+  // First, temporarily replace channel mentions with placeholders
+  const channelMentions: string[] = [];
+  const textWithPlaceholders = text.replace(/<#(\d+)>/g, (match) => {
+    channelMentions.push(match);
+    return `__CHANNEL_MENTION_${channelMentions.length - 1}__`;
+  });
+
+  // Suppress embeds for URLs
+  const suppressedText = textWithPlaceholders.replace(/(https?:\/\/[^\s<>]+)/g, (url) => inlineCode(url));
+
+  // Restore channel mentions
+  return suppressedText.replace(/__CHANNEL_MENTION_(\d+)__/g, (_, index) => channelMentions[parseInt(index)]);
 }
 
 // Load FAQ content at startup
