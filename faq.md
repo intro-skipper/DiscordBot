@@ -26,6 +26,7 @@ Intro Skipper is a Jellyfin plugin that automatically detects and skips intro an
 - Make sure you're using the correct URL: `https://intro-skipper.org/manifest.json`
 - Check if your Jellyfin version is supported (see supported versions)
 - Try restarting Jellyfin after adding the repository
+- **If you only see "Chapter Creator" and "EDL Creator" but not "Intro Skipper", your Jellyfin version is too old** - update Jellyfin to a supported version to see the main Intro Skipper plugin
 
 ## Why are no intros being detected?
 
