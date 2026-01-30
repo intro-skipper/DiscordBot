@@ -102,7 +102,7 @@ async function makeRequest(
         ...history,
       ],
       temperature: 0.1,
-      max_tokens: 500,
+      max_tokens: 800,
     }),
   });
 }
