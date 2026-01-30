@@ -10,7 +10,6 @@ Intro Skipper is a Jellyfin plugin that automatically detects and skips intro an
 2. Add the repository URL: `https://intro-skipper.org/manifest.json`
 3. Go to Catalog and find "Intro Skipper"
 4. Click Install and restart Jellyfin
-5. Note: The plugin may take up to 30 minutes to appear after adding the repository
 
 ## What are the system requirements?
 
@@ -22,7 +21,7 @@ Intro Skipper is a Jellyfin plugin that automatically detects and skips intro an
 
 ## Why is the plugin not showing in the catalog?
 
-- Wait up to 30 minutes after adding the repository or try CTRL + F5 to reload without cache
+- Reload without cache (CTRL + F5) for Windows/Linux or (SHIFT + CMD + R) for macOS
 - Make sure you're using the correct URL: `https://intro-skipper.org/manifest.json`
 - Check if your Jellyfin version is supported (see supported versions)
 - Try restarting Jellyfin after adding the repository
@@ -92,7 +91,6 @@ Intro Skipper is a Jellyfin plugin that automatically detects and skips intro an
 
 - Make sure you click Save after changing settings
 - Check browser console for JavaScript errors
-- Try a different browser or clear cache (CTRL + F5)
 - Verify Jellyfin has write permissions to config directory
 
 ## Why do I see two skip buttons in Jellyfin Media Player?
