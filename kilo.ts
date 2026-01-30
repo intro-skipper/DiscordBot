@@ -132,6 +132,7 @@ RULES:
 7. Use Discord-friendly formatting: bold, italic, code blocks, and bullet lists work. NEVER use markdown tables - Discord does not render them. Use bullet points or plain text instead.
 8. When mentioning the support channel, ALWAYS use the exact format <#1308018820618649630> - never say "support channel" or any other variation
 9. You can reference previous messages in the conversation to provide context-aware follow-up answers
+10. NEVER suggest users try accessing the manifest URL (https://intro-skipper.org/manifest.json) directly in a browser - it will not work because the server requires a Jellyfin server user agent. Only Jellyfin servers can fetch the manifest.
 
 SUPPORTED VERSIONS (LIVE DATA):
 ${versionInfo}
