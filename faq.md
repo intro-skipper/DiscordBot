@@ -124,6 +124,6 @@ Go to the plugin settings "Manage Fingerprints" section, find the show/episode, 
 
 ## Where can I get more help?
 
-- Wiki: <https://github.com/intro-skipper/intro-skipper/wiki>
-- GitHub Issues: <https://github.com/intro-skipper/intro-skipper/issues>
-- GitHub Discussions: <https://github.com/intro-skipper/intro-skipper/discussions>
+- [Wiki](https://github.com/intro-skipper/intro-skipper/wiki)
+- [GitHub Issues](https://github.com/intro-skipper/intro-skipper/issues)
+- [GitHub Discussions](https://github.com/intro-skipper/intro-skipper/discussions)
