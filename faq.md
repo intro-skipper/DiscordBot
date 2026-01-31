@@ -44,6 +44,14 @@ Intro Skipper is a Jellyfin plugin that automatically detects and skips intro an
 - Use Jellyfin's native skip button in player settings
 - For additional UI features, install the File Transformation plugin
 
+## What happened to server-side skipping?
+
+Server-side skipping was removed in favour of the setting **"Ignore intros for first episode of a season"**.
+
+You can find it under: **Plugin settings -> Detection Adjustment Options**
+
+This works with every Jellyfin client that supports **Media Segments**.
+
 ## Why does Jellyfin not start after updating?
 
 - This can happen when updating to a new major Jellyfin version with an old plugin
