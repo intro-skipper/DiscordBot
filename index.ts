@@ -6,6 +6,10 @@ import {
   type ChatInputCommandInteraction,
   type Message,
 } from "discord.js";
+
+// Unicode emoji for thumbs up and thumbs down
+const THUMBS_UP = "👍";
+const THUMBS_DOWN = "👎";
 import { askFAQ } from "./kilo";
 import { getSupportedVersions, formatSupportedVersions } from "./versions";
 
@@ -25,7 +29,7 @@ function suppressEmbeds(text: string): string {
   const suppressedText = textWithPlaceholders.replace(/(https?:\/\/[^\s<>]+)/g, (url) => inlineCode(url));
 
   // Restore channel mentions
-  return suppressedText.replace(/__CHANNEL_MENTION_(\d+)__/g, (_, index) => channelMentions[parseInt(index)]);
+  return suppressedText.replace(/__CHANNEL_MENTION_(\d+)__/g, (_, index) => channelMentions[parseInt(index)] ?? "");
 }
 
 // Load FAQ content at startup
@@ -91,11 +95,16 @@ async function handleChannelQuestion(message: Message, question: string) {
     const response = suppressEmbeds(answer);
 
     // Discord has a 2000 character limit for messages
+    let replyMessage: Message;
     if (response.length > 1900) {
-      await message.reply(response.substring(0, 1900) + "...\n\n*(Response truncated)*");
+      replyMessage = await message.reply(response.substring(0, 1900) + "...\n\n*(Response truncated)*");
     } else {
-      await message.reply(response);
+      replyMessage = await message.reply(response);
     }
+
+    // Add thumbs up and thumbs down reactions for rating
+    await replyMessage.react(THUMBS_UP);
+    await replyMessage.react(THUMBS_DOWN);
   } catch (error) {
     console.error("Error handling channel question:", error);
     await message.reply(
@@ -117,11 +126,16 @@ async function handleAskCommand(interaction: ChatInputCommandInteraction) {
     const response = suppressEmbeds(answer);
 
     // Discord has a 2000 character limit for messages
+    let replyMessage: Message;
     if (response.length > 1900) {
-      await interaction.editReply(response.substring(0, 1900) + "...\n\n*(Response truncated)*");
+      replyMessage = await interaction.editReply(response.substring(0, 1900) + "...\n\n*(Response truncated)*");
     } else {
-      await interaction.editReply(response);
+      replyMessage = await interaction.editReply(response);
     }
+
+    // Add thumbs up and thumbs down reactions for rating
+    await replyMessage.react(THUMBS_UP);
+    await replyMessage.react(THUMBS_DOWN);
   } catch (error) {
     console.error("Error handling ask command:", error);
     await interaction.editReply(
