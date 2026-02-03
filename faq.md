@@ -11,6 +11,15 @@ Intro Skipper is a Jellyfin plugin that automatically detects and skips intro an
 3. Go to Catalog and find "Intro Skipper"
 4. Click Install and restart Jellyfin
 
+## What are the first steps after installation?
+
+1. **Run the analysis task**: Go to Dashboard > Scheduled Tasks and click the play button for "Detect and Analyze Media Segments"
+2. **Wait for analysis to complete**: The plugin will analyze your media library - status is logged before each season/movie
+3. **Test playback**: After a season has completed analyzing, play an episode to verify the skip button appears
+4. **Verify timestamps**: Open Intro Skipper plugin settings, scroll to "Edit Timestamps & Fingerprints" and check if timestamps were detected
+
+For more details, see the [Installation Wiki](https://github.com/intro-skipper/intro-skipper/wiki/Installation).
+
 ## What are the system requirements?
 
 - Jellyfin server with a supported version (see supported versions)
@@ -34,7 +43,7 @@ Intro Skipper is a Jellyfin plugin that automatically detects and skips intro an
 - Check that you have at least 2 episodes in a season (chromaprint needs multiple files to compare)
 - Verify the intro is between 15 seconds and 2 minutes long
 - Check the intro is within the first 25% of the episode or first 10 minutes
-- If you migrated from an older version, try erasing all fingerprints in plugin settings and rescan
+- If you migrated from an older version, try erasing all fingerprints in plugin settings and Run the "Detect and Analyze Media Segments" scheduled task
 
 ## Why is the skip button not visible?
 
@@ -121,6 +130,10 @@ Go to the plugin settings "Manage Fingerprints" section, find the show/episode, 
 3. Delete `/config/data/introskipper` directory
 4. Delete any cache files in `/cache/introskipper`
 5. Restart Jellyfin and reinstall the plugin fresh
+
+## Where is the source code for this bot?
+
+The source code for this Discord bot is available at: [GitHub](https://github.com/intro-skipper/DiscordBot)
 
 ## Where can I get more help?
 
