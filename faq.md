@@ -89,6 +89,14 @@ This works with every Jellyfin client that supports **Media Segments**.
 - Movies: Less than 15 minutes
 - These can be customized in plugin settings under "Modify Segment Parameters"
 
+## Does Intro Skipper work with movies?
+
+**Credits detection** works for movies and will detect and skip end credits.
+
+**Intro detection does NOT work for movies.** Unlike TV episodes where multiple episodes have the same intro audio (which can be matched using chromaprint), movies don't have a reference file to compare against. There is no reliable way to automatically detect movie intros without having another file to compare against.
+
+If you want to skip movie intros manually, you can use the [Jellyfin Segment Editor](https://github.com/intro-skipper/segment-editor) to set custom skip timestamps.
+
 ## Why do scheduled tasks fail instantly?
 
 - Check that jellyfin-ffmpeg is properly installed
