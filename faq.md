@@ -135,6 +135,67 @@ Go to the plugin settings "Manage Fingerprints" section, find the show/episode, 
 
 The source code for this Discord bot is available at: [GitHub](https://github.com/intro-skipper/DiscordBot)
 
+## Where can I find other Jellyfin plugins?
+
+> **Note:** This section provides information about other Jellyfin plugins for reference purposes only. The bot focuses on supporting **Intro Skipper** and does not recommend or provide support for other plugins. For questions about other plugins, please refer to the resources below.
+
+A comprehensive list of Jellyfin plugins, themes, metadata providers, and related tools is available at:
+
+**[awesome-jellyfin](https://github.com/awesome-jellyfin/awesome-jellyfin)** - A curated list of awesome Jellyfin themes and plugins.
+
+Popular plugin categories include:
+
+### 🎵 Music & Audio
+
+- [jellyfin-plugin-listenbrainz](https://github.com/lyarenei/jellyfin-plugin-listenbrainz) - Sync music activity with ListenBrainz (Updated: Feb 2, 2026 · 159 ⭐)
+- [jellyfin-musictags-plugin](https://github.com/jyourstone/jellyfin-musictags-plugin) - Extract and convert audio metadata into tags (Updated: Feb 6, 2026 · 32 ⭐)
+- [playlist-generator](https://github.com/Eeeeelias/playlist-generator) - Create playlists based on listening history (Updated: Jan 27, 2026 · 38 ⭐)
+- [jellyfin-plugin-jellysleep](https://github.com/jon4hz/jellyfin-plugin-jellysleep) - Sleep timer for audio playback (Updated: Feb 5, 2026 · 27 ⭐)
+
+### 🎬 Playback & UI
+
+- [HoverTrailer](https://github.com/Fovty/HoverTrailer) - Display movie trailers on hover (Updated: Jan 30, 2026 · 42 ⭐)
+- [Jellyfin-Enhanced](https://github.com/n00bcodr/Jellyfin-Enhanced) - Keyboard shortcuts, subtitle styling, TMDB reviews (Updated: Feb 6, 2026 · 935 ⭐)
+- [jellyfin-plugin-meilisearch](https://github.com/arnesacnussem/jellyfin-plugin-meilisearch) - Enhanced search speed and accuracy (Updated: Feb 4, 2026 · 213 ⭐)
+
+### 🔔 Notifications
+
+- [jellyfin-plugin-DiscordNotifier](https://github.com/cedev-1/jellyfin-plugin-DiscordNotifier) - Discord notifications (Updated: Jan 27, 2026 · 7 ⭐)
+- [jellyfin-plugin-TelegramNotifier](https://github.com/RomainPierre7/jellyfin-plugin-TelegramNotifier) - Telegram notifications (Updated: Jan 28, 2026 · 126 ⭐)
+- [jellyfin-plugin-webhooks](https://github.com/shemanaev/jellyfin-plugin-webhooks) - Custom webhook notifications (Updated: Jan 19, 2026 · 34 ⭐)
+
+### 📊 Sync & Import
+
+- [jellyfin-ani-sync](https://github.com/vosmiic/jellyfin-ani-sync) - Sync anime progress with Anilist (Updated: Feb 6, 2026 · 414 ⭐)
+- [jellyfin-plugin-letterboxd-sync](https://github.com/danielveigasilva/jellyfin-plugin-letterboxd-sync) - Sync watch history with Letterboxd (Updated: Feb 3, 2026 · 104 ⭐)
+- [jellyfin-plugin-collection-import](https://github.com/lostb1t/jellyfin-plugin-collection-import) - Import collections from external sources (Updated: Jan 27, 2026 · 86 ⭐)
+- [MyAnimeSync](https://github.com/iankiller77/MyAnimeSync) - Sync anime progress with MyAnimeList (Updated: Feb 6, 2026 · 44 ⭐)
+
+### 🎨 Metadata & Collections
+
+- [Plexyfin](https://github.com/cleverdevil/plexyfin) - Sync artwork and collections from Plex (Updated: Feb 2, 2026 · 79 ⭐)
+- [jellyfin-plugin-auto-collections](https://github.com/KeksBombe/jellyfin-plugin-auto-collections) - Dynamic collections based on criteria (Updated: Feb 4, 2026 · 206 ⭐)
+- [Shokofin](https://github.com/ShokoAnime/Shokofin) - Integration with Shoko Server for anime (Updated: Feb 6, 2026 · 249 ⭐)
+
+### 🍥 Anime
+
+- [jellyfin-plugin-onepace](https://github.com/jwueller/jellyfin-plugin-onepace) - Plugin for the One Pace project (Updated: Feb 6, 2026 · 141 ⭐)
+- [Jellyfin-Seasonals](https://github.com/CodeDevMLH/Jellyfin-Seasonals) - Seasonal anime themes and animations (Updated: Feb 4, 2026 · 37 ⭐)
+- [jellyfin-plugin-shikimori](https://github.com/te9c/jellyfin-plugin-shikimori) - Metadata provider for shikimori.one (Updated: Jan 31, 2026 · 26 ⭐)
+- [jellyfin-plugin-myanimelist](https://github.com/ryandash/jellyfin-plugin-myanimelist) - Metadata provider for MyAnimeList (Updated: Feb 2, 2026 · 43 ⭐)
+
+### 🔐 Authentication
+
+- [jellyfin-plugin-ldapauth](https://github.com/jellyfin/jellyfin-plugin-ldapauth) - LDAP authentication (Updated: Feb 4, 2026 · 184 ⭐) - Official Jellyfin Plugin
+- [jellyfin-plugin-sso](https://github.com/9p4/jellyfin-plugin-sso) - Single Sign-On support (Updated: Feb 5, 2026 · 1,267 ⭐)
+- [TeleJelly](https://github.com/hexxone/TeleJelly) - Telegram login integration (Updated: Jan 25, 2026 · 23 ⭐)
+
+### 📺 Media Management
+
+- [jellyfin-plugin-cinemamode](https://github.com/CherryFloors/jellyfin-plugin-cinemamode) - Cinema Mode with trailers (Updated: Jan 30, 2026 · 94 ⭐)
+- [jellyfin-plugin-media-cleaner](https://github.com/shemanaev/jellyfin-plugin-media-cleaner) - Auto-remove played media (Updated: Feb 3, 2026 · 207 ⭐)
+- [Jellyfin Segment Editor](https://github.com/intro-skipper/segment-editor) - Manage media segment positions (Updated: Feb 4, 2026)
+
 ## Where can I get more help?
 
 - [Wiki](https://github.com/intro-skipper/intro-skipper/wiki)
