@@ -16,6 +16,9 @@ import { getSupportedVersions, formatSupportedVersions } from "./versions";
 // Channel name to listen for direct questions
 const SUPPORT_CHANNEL_NAME = "🤖support-bot";
 
+// Role name that should be ignored in conversations
+const DEVELOPER_ROLE_NAME = "Developer";
+
 // Wrap URLs in inline code to suppress Discord embeds, but preserve channel mentions
 function suppressEmbeds(text: string): string {
   // First, temporarily replace channel mentions with placeholders
@@ -42,6 +45,7 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers,
   ],
 });
 
@@ -66,6 +70,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
+// Check if a guild member has the Developer role
+function hasDeveloperRole(message: Message): boolean {
+  return message.member?.roles.cache.some(
+    (role) => role.name === DEVELOPER_ROLE_NAME
+  ) ?? false;
+}
+
 // Handle direct messages in the support channel
 client.on(Events.MessageCreate, async (message) => {
   // Ignore bot messages
@@ -78,6 +89,18 @@ client.on(Events.MessageCreate, async (message) => {
   // Ignore empty messages or messages that are just attachments
   const question = message.content.trim();
   if (!question) return;
+
+  // If this is a reply, check if the referenced message author has the Developer role
+  if (message.reference?.messageId) {
+    try {
+      const referencedMessage = await message.channel.messages.fetch(
+        message.reference.messageId
+      );
+      if (hasDeveloperRole(referencedMessage)) return;
+    } catch {
+      // If we can't fetch the referenced message, continue normally
+    }
+  }
 
   await handleChannelQuestion(message, question);
 });
