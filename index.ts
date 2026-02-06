@@ -90,12 +90,16 @@ client.on(Events.MessageCreate, async (message) => {
   const question = message.content.trim();
   if (!question) return;
 
-  // If this is a reply, check if the referenced message author has the Developer role
+  // If this is a reply, check for Developer role involvement
   if (message.reference?.messageId) {
+    // If a Developer replies to a user message, don't respond (Developer is handling it)
+    if (hasDeveloperRole(message)) return;
+
     try {
       const referencedMessage = await message.channel.messages.fetch(
         message.reference.messageId
       );
+      // If a user replies to a Developer message, don't respond (Developer is handling it)
       if (hasDeveloperRole(referencedMessage)) return;
     } catch {
       // If we can't fetch the referenced message, continue normally
