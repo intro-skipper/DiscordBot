@@ -1,7 +1,9 @@
 const KILO_API_KEY = process.env.KILO_API_KEY;
 const KILO_API_URL = "https://api.kilo.ai/api/openrouter/chat/completions";
 const KILO_MODELS_URL = "https://api.kilo.ai/api/openrouter/models";
-const KILO_MODEL = process.env.KILO_MODEL ?? "minimax/minimax-m2.1:free";
+
+// Use a known-good free model as default
+const KILO_MODEL = process.env.KILO_MODEL ?? "arcee-ai/trinity-large-preview:free";
 
 import { getSupportedVersions, formatSupportedVersions } from "./versions";
 
@@ -28,6 +30,7 @@ interface KiloModelWithPricing extends KiloModel {
     prompt: string;
     completion: string;
   };
+  preferredIndex?: number;
 }
 
 // Conversation history storage (channelId/uniqueId -> messages)
@@ -65,18 +68,30 @@ async function getFreeModel(): Promise<string | null> {
     const data = (await response.json()) as { data: KiloModelWithPricing[] };
     const models = data.data ?? [];
 
-    // First, try to find a model ending with :free
-    const freeModel = models.find((model) => model.id.endsWith(":free"));
-    if (freeModel) return freeModel.id;
-
-    // Fallback: find a model with zero pricing
-    const zeroPricingModel = models.find(
+    // Find a model that:
+    // 1. Ends with :free (Kilo's naming convention for free models)
+    // 2. Has a preferredIndex (meaning Kilo has vetted/endorsed it)
+    // 3. Has zero pricing
+    // This avoids picking OpenRouter :free models that Kilo blocks
+    const kiloFreeModel = models.find(
       (model) =>
+        model.id.endsWith(":free") &&
+        model.preferredIndex !== undefined &&
         model.pricing &&
         parseFloat(model.pricing.prompt) === 0 &&
         parseFloat(model.pricing.completion) === 0
     );
-    return zeroPricingModel?.id ?? null;
+    if (kiloFreeModel) return kiloFreeModel.id;
+
+    // Fallback: any model ending with :free that has zero pricing
+    const freeModel = models.find(
+      (model) =>
+        model.id.endsWith(":free") &&
+        model.pricing &&
+        parseFloat(model.pricing.prompt) === 0 &&
+        parseFloat(model.pricing.completion) === 0
+    );
+    return freeModel?.id ?? null;
   } catch {
     return null;
   }
@@ -101,8 +116,8 @@ async function makeRequest(
         { role: "system", content: systemPrompt },
         ...history,
       ],
-      temperature: 0.1,
-      max_tokens: 800,
+      temperature: 0.1, // Low for factual accuracy
+      max_tokens: 800, // Adjust based on desired summary length
     }),
   });
 }
@@ -158,7 +173,7 @@ ${faqContent}`;
 
   // If the model fails, try to find a free model
   if (!response.ok) {
-    console.warn(`Model ${KILO_MODEL} failed, searching for free model...`);
+    console.warn(`Model ${KILO_MODEL} failed (${response.status}), searching for free model...`);
     const freeModel = await getFreeModel();
 
     if (freeModel) {
