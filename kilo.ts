@@ -2,8 +2,19 @@ const KILO_API_KEY = process.env.KILO_API_KEY;
 const KILO_API_URL = "https://api.kilo.ai/api/openrouter/chat/completions";
 const KILO_MODELS_URL = "https://api.kilo.ai/api/openrouter/models";
 
-// Use a known-good free model as default
+// Default free model
 const KILO_MODEL = process.env.KILO_MODEL ?? "arcee-ai/trinity-large-preview:free";
+
+// Cheap paid fallbacks for text tasks (ordered cheapest first)
+const CHEAP_FALLBACK_MODELS = [
+  "google/gemini-3-flash-preview",
+  "anthropic/claude-haiku-4.5",
+];
+
+// Stable identifier for this bot instance — used for prompt cache affinity.
+// All conversations share the same FAQ/system prompt, so a single task ID
+// lets the provider cache that prefix and reuse it across requests.
+const BOT_TASK_ID = "intro-skipper-support-bot";
 
 import { getSupportedVersions, formatSupportedVersions } from "./versions";
 
@@ -109,6 +120,10 @@ async function makeRequest(
       "Content-Type": "application/json",
       "HTTP-Referer": "https://github.com/intro-skipper/intro-skipper",
       "X-Title": "Intro Skipper Support Bot",
+      // Enable prompt caching: the server hashes this with the user ID
+      // to create a prompt_cache_key, which tells the provider to reuse
+      // the cached system prompt prefix across requests.
+      "X-KiloCode-TaskId": BOT_TASK_ID,
     },
     body: JSON.stringify({
       model,
@@ -169,16 +184,36 @@ ${faqContent}`;
   // Keep only recent messages to avoid token limits
   const recentHistory = history.slice(-MAX_HISTORY_MESSAGES);
 
+  // Tier 1: Try the configured model (default: free)
   let response = await makeRequest(KILO_MODEL, systemPrompt, recentHistory);
 
-  // If the model fails, try to find a free model
+  // Tier 2: If configured model fails, try to find any free model
   if (!response.ok) {
-    console.warn(`Model ${KILO_MODEL} failed (${response.status}), searching for free model...`);
+    console.warn(
+      `Model ${KILO_MODEL} failed (${response.status}), searching for free model...`
+    );
     const freeModel = await getFreeModel();
 
     if (freeModel) {
       console.log(`Retrying with free model: ${freeModel}`);
       response = await makeRequest(freeModel, systemPrompt, recentHistory);
+    }
+  }
+
+  // Tier 3: If no free model works, try cheap paid models
+  if (!response.ok) {
+    for (const cheapModel of CHEAP_FALLBACK_MODELS) {
+      console.warn(
+        `Free models unavailable, trying cheap paid model: ${cheapModel}`
+      );
+      response = await makeRequest(cheapModel, systemPrompt, recentHistory);
+
+      if (response.ok) {
+        console.log(`Success with cheap paid model: ${cheapModel}`);
+        break;
+      }
+
+      console.warn(`Cheap model ${cheapModel} failed (${response.status})`);
     }
   }
 
@@ -188,7 +223,8 @@ ${faqContent}`;
   }
 
   const data = (await response.json()) as KiloResponse;
-  const answer = data.choices[0]?.message?.content ?? "Sorry, I couldn't generate a response.";
+  const answer =
+    data.choices[0]?.message?.content ?? "Sorry, I couldn't generate a response.";
 
   // Save assistant response to history
   if (conversationId) {
