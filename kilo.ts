@@ -22,12 +22,34 @@ interface ChatMessage {
   content: string;
 }
 
+interface KiloUsage {
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+  cost?: number;
+  prompt_tokens_details?: { cached_tokens: number };
+}
+
 interface KiloResponse {
   choices: {
     message: {
       content: string;
     };
   }[];
+  model?: string;
+  usage?: KiloUsage;
+}
+
+export interface FAQResult {
+  answer: string;
+  model: string;
+  cost: number;
+  tokens: {
+    prompt: number;
+    completion: number;
+    total: number;
+    cached: number;
+  };
 }
 
 interface KiloModel {
@@ -136,11 +158,18 @@ async function makeRequest(
   });
 }
 
+function formatCost(cost: number): string {
+  if (cost === 0) return "free";
+  if (cost < 0.0001) return `$${cost.toFixed(6)}`;
+  if (cost < 0.01) return `$${cost.toFixed(4)}`;
+  return `$${cost.toFixed(4)}`;
+}
+
 export async function askFAQ(
   faqContent: string,
   userQuestion: string,
   conversationId?: string
-): Promise<string> {
+): Promise<FAQResult> {
   if (!KILO_API_KEY) {
     throw new Error("KILO_API_KEY is not set in environment variables");
   }
@@ -225,14 +254,30 @@ ${faqContent}`;
   const answer =
     data.choices[0]?.message?.content ?? "Sorry, I couldn't generate a response.";
 
+  // Extract usage/cost info
+  const usage = data.usage;
+  const result: FAQResult = {
+    answer,
+    model: data.model ?? "unknown",
+    cost: usage?.cost ?? 0,
+    tokens: {
+      prompt: usage?.prompt_tokens ?? 0,
+      completion: usage?.completion_tokens ?? 0,
+      total: usage?.total_tokens ?? 0,
+      cached: usage?.prompt_tokens_details?.cached_tokens ?? 0,
+    },
+  };
+
   // Save assistant response to history
   if (conversationId) {
     history.push({ role: "assistant", content: answer });
     conversationHistory.set(conversationId, history.slice(-MAX_HISTORY_MESSAGES));
   }
 
-  return answer;
+  return result;
 }
+
+export { formatCost };
 
 // Export function to clear a conversation
 export function clearConversation(conversationId: string): void {

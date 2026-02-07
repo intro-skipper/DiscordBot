@@ -10,7 +10,7 @@ import {
 // Unicode emoji for thumbs up and thumbs down
 const THUMBS_UP = "👍";
 const THUMBS_DOWN = "👎";
-import { askFAQ } from "./kilo";
+import { askFAQ, formatCost, type FAQResult } from "./kilo";
 import { getSupportedVersions, formatSupportedVersions } from "./versions";
 
 // Channel name to listen for direct questions
@@ -33,6 +33,15 @@ function suppressEmbeds(text: string): string {
 
   // Restore channel mentions
   return suppressedText.replace(/__CHANNEL_MENTION_(\d+)__/g, (_, index) => channelMentions[parseInt(index)] ?? "");
+}
+
+// Format the cost footer for Discord messages
+function formatCostFooter(result: FAQResult): string {
+  const costStr = formatCost(result.cost);
+  const cachedStr = result.tokens.cached > 0
+    ? ` | cached: ${result.tokens.cached}`
+    : "";
+  return `\n-# 🤖 ${result.model} | ${costStr} | tokens: ${result.tokens.total}${cachedStr}`;
 }
 
 // Load FAQ content at startup
@@ -118,8 +127,8 @@ async function handleChannelQuestion(message: Message, question: string) {
 
     // Use channel ID + user ID for conversation context
     const conversationId = `${message.channelId}-${message.author.id}`;
-    const answer = await askFAQ(faqContent, question, conversationId);
-    const response = suppressEmbeds(answer);
+    const result = await askFAQ(faqContent, question, conversationId);
+    const response = suppressEmbeds(result.answer) + formatCostFooter(result);
 
     // Discord has a 2000 character limit for messages
     let replyMessage: Message;
@@ -149,8 +158,8 @@ async function handleAskCommand(interaction: ChatInputCommandInteraction) {
   try {
     // Use channel ID + user ID for conversation context
     const conversationId = `${interaction.channelId}-${interaction.user.id}`;
-    const answer = await askFAQ(faqContent, question, conversationId);
-    const response = suppressEmbeds(answer);
+    const result = await askFAQ(faqContent, question, conversationId);
+    const response = suppressEmbeds(result.answer) + formatCostFooter(result);
 
     // Discord has a 2000 character limit for messages
     let replyMessage: Message;
