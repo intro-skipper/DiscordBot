@@ -1,6 +1,5 @@
 const KILO_API_KEY = process.env.KILO_API_KEY;
 const KILO_API_URL = "https://api.kilo.ai/api/openrouter/chat/completions";
-const KILO_MODELS_URL = "https://api.kilo.ai/api/openrouter/models";
 
 // Default model
 const KILO_MODEL = process.env.KILO_MODEL ?? "anthropic/claude-haiku-4.5";
@@ -52,19 +51,6 @@ export interface FAQResult {
   };
 }
 
-interface KiloModel {
-  id: string;
-  name: string;
-}
-
-interface KiloModelWithPricing extends KiloModel {
-  pricing?: {
-    prompt: string;
-    completion: string;
-  };
-  preferredIndex?: number;
-}
-
 // Conversation history storage (channelId/uniqueId -> messages)
 const conversationHistory = new Map<string, ChatMessage[]>();
 const HISTORY_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes
@@ -86,48 +72,6 @@ function cleanupOldConversations() {
 
 // Run cleanup every 10 minutes
 setInterval(cleanupOldConversations, 10 * 60 * 1000);
-
-async function getFreeModel(): Promise<string | null> {
-  try {
-    const response = await fetch(KILO_MODELS_URL, {
-      headers: {
-        Authorization: `Bearer ${KILO_API_KEY}`,
-      },
-    });
-
-    if (!response.ok) return null;
-
-    const data = (await response.json()) as { data: KiloModelWithPricing[] };
-    const models = data.data ?? [];
-
-    // Find a model that:
-    // 1. Ends with :free (Kilo's naming convention for free models)
-    // 2. Has a preferredIndex (meaning Kilo has vetted/endorsed it)
-    // 3. Has zero pricing
-    // This avoids picking OpenRouter :free models that Kilo blocks
-    const kiloFreeModel = models.find(
-      (model) =>
-        model.id.endsWith(":free") &&
-        model.preferredIndex !== undefined &&
-        model.pricing &&
-        parseFloat(model.pricing.prompt) === 0 &&
-        parseFloat(model.pricing.completion) === 0
-    );
-    if (kiloFreeModel) return kiloFreeModel.id;
-
-    // Fallback: any model ending with :free that has zero pricing
-    const freeModel = models.find(
-      (model) =>
-        model.id.endsWith(":free") &&
-        model.pricing &&
-        parseFloat(model.pricing.prompt) === 0 &&
-        parseFloat(model.pricing.completion) === 0
-    );
-    return freeModel?.id ?? null;
-  } catch {
-    return null;
-  }
-}
 
 async function makeRequest(
   model: string,
@@ -212,36 +156,23 @@ ${faqContent}`;
   // Keep only recent messages to avoid token limits
   const recentHistory = history.slice(-MAX_HISTORY_MESSAGES);
 
-  // Tier 1: Try the configured model (default: free)
+  // Try the configured primary model
   let response = await makeRequest(KILO_MODEL, systemPrompt, recentHistory);
 
-  // Tier 2: If configured model fails, try to find any free model
+  // If primary model fails, try fallback models
   if (!response.ok) {
-    console.warn(
-      `Model ${KILO_MODEL} failed (${response.status}), searching for free model...`
-    );
-    const freeModel = await getFreeModel();
-
-    if (freeModel) {
-      console.log(`Retrying with free model: ${freeModel}`);
-      response = await makeRequest(freeModel, systemPrompt, recentHistory);
-    }
-  }
-
-  // Tier 3: If no free model works, try cheap paid models
-  if (!response.ok) {
-    for (const cheapModel of CHEAP_FALLBACK_MODELS) {
+    for (const fallbackModel of CHEAP_FALLBACK_MODELS) {
       console.warn(
-        `Free models unavailable, trying cheap paid model: ${cheapModel}`
+        `Model ${KILO_MODEL} failed (${response.status}), trying fallback: ${fallbackModel}`
       );
-      response = await makeRequest(cheapModel, systemPrompt, recentHistory);
+      response = await makeRequest(fallbackModel, systemPrompt, recentHistory);
 
       if (response.ok) {
-        console.log(`Success with cheap paid model: ${cheapModel}`);
+        console.log(`Success with fallback model: ${fallbackModel}`);
         break;
       }
 
-      console.warn(`Cheap model ${cheapModel} failed (${response.status})`);
+      console.warn(`Fallback model ${fallbackModel} failed (${response.status})`);
     }
   }
 
