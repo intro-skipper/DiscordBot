@@ -2,13 +2,12 @@ const KILO_API_KEY = process.env.KILO_API_KEY;
 const KILO_API_URL = "https://api.kilo.ai/api/openrouter/chat/completions";
 const KILO_MODELS_URL = "https://api.kilo.ai/api/openrouter/models";
 
-// Default free model
-const KILO_MODEL = process.env.KILO_MODEL ?? "arcee-ai/trinity-large-preview:free";
+// Default model
+const KILO_MODEL = process.env.KILO_MODEL ?? "anthropic/claude-haiku-4.5";
 
-// Cheap paid fallbacks for text tasks (ordered cheapest first)
+// Fallback models (ordered by preference)
 const CHEAP_FALLBACK_MODELS = [
   "google/gemini-3-flash-preview",
-  "anthropic/claude-haiku-4.5",
 ];
 
 // Stable identifier for this bot instance — used for prompt cache affinity.
