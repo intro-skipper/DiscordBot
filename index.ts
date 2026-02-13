@@ -10,7 +10,7 @@ import {
 // Unicode emoji for thumbs up and thumbs down
 const THUMBS_UP = "👍";
 const THUMBS_DOWN = "👎";
-import { askFAQ, formatCost, type FAQResult } from "./kilo";
+import { askFAQ, formatCost, type FAQResult, getAvailableModels, getCurrentModel, setCurrentModel, type ModelInfo } from "./kilo";
 import { getSupportedVersions, formatSupportedVersions } from "./versions";
 
 // Channel name to listen for direct questions
@@ -76,6 +76,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
     await handleHelpCommand(interaction);
   } else if (commandName === "versions") {
     await handleVersionsCommand(interaction);
+  } else if (commandName === "model") {
+    await handleModelCommand(interaction);
   }
 });
 
@@ -211,6 +213,7 @@ I'm here to help answer your questions about the Intro Skipper plugin for Jellyf
 ## Commands
 - \`/ask <question>\` - Ask me anything about Intro Skipper
 - \`/versions\` - Show supported Jellyfin versions
+- \`/model\` - View or change the current LLM model
 - \`/help\` - Show this help message
 
 ## Examples
@@ -223,6 +226,54 @@ I'm here to help answer your questions about the Intro Skipper plugin for Jellyf
 - 🐛 Report issues: <https://github.com/intro-skipper/intro-skipper/issues>`;
 
   await interaction.reply(helpMessage);
+}
+
+async function handleModelCommand(interaction: ChatInputCommandInteraction) {
+  const newModel = interaction.options.getString("set");
+
+  // If no model provided, show current model and available models
+  if (!newModel) {
+    await interaction.deferReply();
+
+    try {
+      const currentModel = getCurrentModel();
+      const models = await getAvailableModels();
+
+      // Show first 20 models to avoid message length issues
+      const displayModels = models.slice(0, 20);
+      const modelList = displayModels
+        .map((m) => {
+          const current = m.id === currentModel ? " ✅" : "";
+          return `- \`${m.id}\`${current}`;
+        })
+        .join("\n");
+
+      const moreInfo = models.length > 20
+        ? `\n\n*...and ${models.length - 20} more models available*`
+        : "";
+
+      const message = `# 🤖 LLM Model Configuration
+
+**Current model:** \`${currentModel}\`
+
+## Available Models
+${modelList}${moreInfo}
+
+Use \`/model set:<model_id>\` to change the model.`;
+
+      await interaction.editReply(message);
+    } catch (error) {
+      console.error("Error fetching models:", error);
+      await interaction.editReply(
+        `**Current model:** \`${getCurrentModel()}\`\n\n❌ Could not fetch available models from API.`
+      );
+    }
+    return;
+  }
+
+  // Set new model
+  setCurrentModel(newModel);
+  await interaction.reply(`✅ Model changed to: \`${newModel}\``);
 }
 
 // Login

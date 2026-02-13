@@ -1,9 +1,10 @@
 const KILO_API_KEY = process.env.KILO_API_KEY;
-const ORGID = process.env.KILO_ORGID;
+const ORGID = process.env.ORGID;
 const KILO_API_URL = "https://api.kilo.ai/api/openrouter/chat/completions";
+const KILO_MODELS_URL = "https://api.kilo.ai/api/openrouter/models";
 
-// Default model
-const KILO_MODEL = process.env.KILO_MODEL ?? "anthropic/claude-haiku-4.5";
+// Current model (can be changed at runtime)
+let currentModel = process.env.KILO_MODEL ?? "anthropic/claude-haiku-4.5";
 
 // Fallback models (ordered by preference)
 const CHEAP_FALLBACK_MODELS = [
@@ -165,13 +166,13 @@ ${faqContent}`;
   const recentHistory = history.slice(-MAX_HISTORY_MESSAGES);
 
   // Try the configured primary model
-  let response = await makeRequest(KILO_MODEL, systemPrompt, recentHistory);
+  let response = await makeRequest(currentModel, systemPrompt, recentHistory);
 
   // If primary model fails, try fallback models
   if (!response.ok) {
     for (const fallbackModel of CHEAP_FALLBACK_MODELS) {
       console.warn(
-        `Model ${KILO_MODEL} failed (${response.status}), trying fallback: ${fallbackModel}`
+        `Model ${currentModel} failed (${response.status}), trying fallback: ${fallbackModel}`
       );
       response = await makeRequest(fallbackModel, systemPrompt, recentHistory);
 
@@ -222,4 +223,69 @@ export { formatCost };
 export function clearConversation(conversationId: string): void {
   conversationHistory.delete(conversationId);
   conversationTimestamps.delete(conversationId);
+}
+
+// Model management
+export interface ModelInfo {
+  id: string;
+  name: string;
+  context_length?: number;
+  pricing?: {
+    prompt?: number;
+    completion?: number;
+  };
+}
+
+interface KiloModelsResponse {
+  data: Array<{
+    id: string;
+    name?: string;
+    context_length?: number;
+    pricing?: {
+      prompt?: number;
+      completion?: number;
+    };
+  }>;
+}
+
+// Fetch available models from Kilo Code API
+export async function getAvailableModels(): Promise<ModelInfo[]> {
+  if (!KILO_API_KEY) {
+    throw new Error("KILO_API_KEY is not set in environment variables");
+  }
+
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${KILO_API_KEY}`,
+  };
+
+  if (ORGID) {
+    headers["X-KiloCode-OrganizationId"] = ORGID;
+  }
+
+  const response = await fetch(KILO_MODELS_URL, { headers });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to fetch models: ${response.status} - ${error}`);
+  }
+
+  const data = (await response.json()) as KiloModelsResponse;
+
+  return data.data.map((model) => ({
+    id: model.id,
+    name: model.name ?? model.id,
+    context_length: model.context_length,
+    pricing: model.pricing,
+  }));
+}
+
+// Get the current model
+export function getCurrentModel(): string {
+  return currentModel;
+}
+
+// Set the current model
+export function setCurrentModel(model: string): void {
+  currentModel = model;
+  console.log(`🤖 Model changed to: ${model}`);
 }

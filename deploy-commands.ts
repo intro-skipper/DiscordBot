@@ -1,4 +1,4 @@
-import { REST, Routes, SlashCommandBuilder } from "discord.js";
+import { PermissionFlagsBits, REST, Routes, SlashCommandBuilder } from "discord.js";
 
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
@@ -26,6 +26,16 @@ const commands = [
   new SlashCommandBuilder()
     .setName("help")
     .setDescription("Show help information about the Intro Skipper support bot"),
+  new SlashCommandBuilder()
+    .setName("model")
+    .setDescription("View or change the current LLM model")
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers | PermissionFlagsBits.KickMembers)
+    .addStringOption((option) =>
+      option
+        .setName("set")
+        .setDescription("Set a new model (leave empty to see current model)")
+        .setRequired(false)
+    ),
 ].map((command) => command.toJSON());
 
 const rest = new REST().setToken(token);

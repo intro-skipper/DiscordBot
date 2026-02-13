@@ -78,10 +78,13 @@ bun run start  # Production
 
 ## Commands
 
-| Command            | Description                        |
-| ------------------ | ---------------------------------- |
-| `/ask <question>`  | Ask a question about Intro Skipper |
-| `/help`            | Show help and useful links         |
+| Command                  | Description                                      |
+| ------------------------ | ------------------------------------------------ |
+| `/ask <question>`        | Ask a question about Intro Skipper               |
+| `/versions`              | Show supported Jellyfin versions                 |
+| `/model`                 | View current LLM model and available models      |
+| `/model set:<model_id>`  | Change the LLM model used for responses          |
+| `/help`                  | Show help and useful links                       |
 
 ## Customizing the FAQ
 
