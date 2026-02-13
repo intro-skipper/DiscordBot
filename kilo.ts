@@ -16,6 +16,7 @@ const CHEAP_FALLBACK_MODELS = [
 // lets the provider cache that prefix and reuse it across requests.
 const BOT_TASK_ID = "intro-skipper-support-bot";
 
+import { X_KILOCODE_ORGANIZATIONID, X_KILOCODE_PROJECTID, X_KILOCODE_TASKID, X_TITLE } from "./headers";
 import { getSupportedVersions, formatSupportedVersions } from "./versions";
 
 interface ChatMessage {
@@ -83,17 +84,17 @@ async function makeRequest(
   const headers: Record<string, string> = {
     Authorization: `Bearer ${KILO_API_KEY}`,
     "Content-Type": "application/json",
-    "HTTP-Referer": "https://github.com/intro-skipper/intro-skipper",
-    "X-Title": "Intro Skipper Support Bot",
+    [X_KILOCODE_PROJECTID]: "https://github.com/intro-skipper/DiscordBot.git",
+    [X_TITLE]: "Intro Skipper Support Bot",
     // Enable prompt caching: the server hashes this with the user ID
     // to create a prompt_cache_key, which tells the provider to reuse
     // the cached system prompt prefix across requests.
-    "X-KiloCode-TaskId": BOT_TASK_ID,
+    [X_KILOCODE_TASKID]: BOT_TASK_ID,
   };
 
   // Add organization ID header if ORGID environment variable exists
   if (ORGID) {
-    headers["X-KiloCode-OrganizationId"] = ORGID;
+    headers[X_KILOCODE_ORGANIZATIONID] = ORGID;
   }
 
   return fetch(KILO_API_URL, {
