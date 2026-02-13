@@ -294,19 +294,8 @@ interface KiloModelsResponse {
 
 // Fetch available models from Kilo Code API (text-only models)
 export async function getAvailableModels(): Promise<ModelInfo[]> {
-  if (!KILO_API_KEY) {
-    throw new Error("KILO_API_KEY is not set in environment variables");
-  }
 
-  const headers: Record<string, string> = {
-    Authorization: `Bearer ${KILO_API_KEY}`,
-  };
-
-  if (ORGID) {
-    headers["X-KiloCode-OrganizationId"] = ORGID;
-  }
-
-  const response = await fetch(KILO_MODELS_URL, { headers });
+  const response = await fetch(KILO_MODELS_URL);
 
   if (!response.ok) {
     const error = await response.text();
