@@ -35,6 +35,7 @@ const commands = [
         .setName("set")
         .setDescription("Set a new model (leave empty to see current model)")
         .setRequired(false)
+        .setAutocomplete(true)
     ),
 ].map((command) => command.toJSON());
 

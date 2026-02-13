@@ -3,6 +3,7 @@ import {
   Events,
   GatewayIntentBits,
   inlineCode,
+  type AutocompleteInteraction,
   type ChatInputCommandInteraction,
   type Message,
 } from "discord.js";
@@ -66,6 +67,14 @@ client.once(Events.ClientReady, (readyClient) => {
 
 // Handle slash commands
 client.on(Events.InteractionCreate, async (interaction) => {
+  // Handle autocomplete
+  if (interaction.isAutocomplete()) {
+    if (interaction.commandName === "model") {
+      await handleModelAutocomplete(interaction);
+    }
+    return;
+  }
+
   if (!interaction.isChatInputCommand()) return;
 
   const { commandName } = interaction;
@@ -274,6 +283,44 @@ Use \`/model set:<model_id>\` to change the model.`;
   // Set new model
   setCurrentModel(newModel);
   await interaction.reply(`✅ Model changed to: \`${newModel}\``);
+}
+
+// Cache for models to avoid repeated API calls
+let cachedModels: ModelInfo[] | null = null;
+let modelsCacheTime = 0;
+const MODELS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+async function handleModelAutocomplete(interaction: AutocompleteInteraction) {
+  const focusedOption = interaction.options.getFocused(true);
+  
+  if (focusedOption.name !== "set") {
+    await interaction.respond([]);
+    return;
+  }
+
+  try {
+    // Use cached models if available and not expired
+    const now = Date.now();
+    if (!cachedModels || now - modelsCacheTime > MODELS_CACHE_TTL) {
+      cachedModels = await getAvailableModels();
+      modelsCacheTime = now;
+    }
+
+    // Filter models based on user input
+    const query = focusedOption.value.toLowerCase();
+    const filtered = cachedModels
+      .filter((m) => m.id.toLowerCase().includes(query))
+      .slice(0, 25) // Discord limits to 25 choices
+      .map((m) => ({
+        name: m.name.length > 100 ? m.id : m.name, // Discord name limit
+        value: m.id,
+      }));
+
+    await interaction.respond(filtered);
+  } catch (error) {
+    console.error("Error in model autocomplete:", error);
+    await interaction.respond([]);
+  }
 }
 
 // Login

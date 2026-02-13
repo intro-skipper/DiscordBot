@@ -1,5 +1,5 @@
 const KILO_API_KEY = process.env.KILO_API_KEY;
-const ORGID = process.env.ORGID;
+const ORGID = process.env.KILO_ORGID;
 const KILO_API_URL = "https://api.kilo.ai/api/openrouter/chat/completions";
 const KILO_MODELS_URL = "https://api.kilo.ai/api/openrouter/models";
 
