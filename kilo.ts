@@ -282,10 +282,17 @@ interface KiloModelsResponse {
       prompt?: number;
       completion?: number;
     };
+    architecture?: {
+      modality?: string;
+      input_modalities?: string[];
+      output_modalities?: string[];
+      tokenizer?: string;
+      instruct_type?: string;
+    };
   }>;
 }
 
-// Fetch available models from Kilo Code API
+// Fetch available models from Kilo Code API (text-only models)
 export async function getAvailableModels(): Promise<ModelInfo[]> {
   if (!KILO_API_KEY) {
     throw new Error("KILO_API_KEY is not set in environment variables");
@@ -308,12 +315,27 @@ export async function getAvailableModels(): Promise<ModelInfo[]> {
 
   const data = (await response.json()) as KiloModelsResponse;
 
-  return data.data.map((model) => ({
-    id: model.id,
-    name: model.name ?? model.id,
-    context_length: model.context_length,
-    pricing: model.pricing,
-  }));
+  // Filter out image models - only keep text models
+  // Check output_modalities: only include models that output text
+  return data.data
+    .filter((model) => {
+      const outputModalities = model.architecture?.output_modalities ?? [];
+      
+      // Only include models that have "text" as output modality
+      // This excludes image generation models that output "image"
+      if (!outputModalities.includes("text")) return false;
+      
+      // Exclude models that output images
+      if (outputModalities.includes("image")) return false;
+      
+      return true;
+    })
+    .map((model) => ({
+      id: model.id,
+      name: model.name ?? model.id,
+      context_length: model.context_length,
+      pricing: model.pricing,
+    }));
 }
 
 // Get the current model
