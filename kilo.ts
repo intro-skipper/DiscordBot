@@ -1,10 +1,46 @@
+import { readFileSync, writeFileSync, existsSync } from "fs";
+import { join } from "path";
+
 const KILO_API_KEY = process.env.KILO_API_KEY;
 const ORGID = process.env.KILO_ORGID;
 const KILO_API_URL = "https://api.kilo.ai/api/openrouter/chat/completions";
 const KILO_MODELS_URL = "https://api.kilo.ai/api/openrouter/models";
 
-// Current model (can be changed at runtime)
-let currentModel = process.env.KILO_MODEL ?? "anthropic/claude-haiku-4.5";
+// Path to persist the current model (use /data for Docker containers with volume mount)
+const DATA_DIR = process.env.DATA_DIR ?? "/data";
+const MODEL_CONFIG_PATH = join(DATA_DIR, "model-config.json");
+
+// Default model from environment or fallback
+const DEFAULT_MODEL = process.env.KILO_MODEL ?? "anthropic/claude-haiku-4.5";
+
+// Load persisted model or use default
+function loadPersistedModel(): string {
+  try {
+    if (existsSync(MODEL_CONFIG_PATH)) {
+      const data = readFileSync(MODEL_CONFIG_PATH, "utf-8");
+      const config = JSON.parse(data);
+      if (config.currentModel && typeof config.currentModel === "string") {
+        console.log(`🤖 Loaded persisted model: ${config.currentModel}`);
+        return config.currentModel;
+      }
+    }
+  } catch (error) {
+    console.warn("Failed to load persisted model, using default:", error);
+  }
+  return DEFAULT_MODEL;
+}
+
+// Save model to persistent storage
+function persistModel(model: string): void {
+  try {
+    writeFileSync(MODEL_CONFIG_PATH, JSON.stringify({ currentModel: model }, null, 2));
+  } catch (error) {
+    console.error("Failed to persist model:", error);
+  }
+}
+
+// Current model (can be changed at runtime, persisted across restarts)
+let currentModel = loadPersistedModel();
 
 // Fallback models (ordered by preference)
 const CHEAP_FALLBACK_MODELS = [
@@ -285,8 +321,9 @@ export function getCurrentModel(): string {
   return currentModel;
 }
 
-// Set the current model
+// Set the current model (persists across restarts)
 export function setCurrentModel(model: string): void {
   currentModel = model;
+  persistModel(model);
   console.log(`🤖 Model changed to: ${model}`);
 }

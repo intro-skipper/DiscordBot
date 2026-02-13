@@ -108,3 +108,5 @@ tokens.json
 # IG
 lastTimeStamp.json
 ig_token.json
+# Model config (persisted model selection)
+model-config.json

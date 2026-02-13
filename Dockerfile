@@ -10,4 +10,7 @@ FROM base AS release
 COPY --from=install /temp/prod/node_modules node_modules
 COPY *.ts .
 COPY faq.md .
+# Create data directory for persistent storage
+RUN mkdir -p /data
+VOLUME ["/data"]
 ENTRYPOINT [ "bun", "run", "index.ts" ]
