@@ -45,6 +45,10 @@ For more details, see the Installation Wiki at `https://github.com/intro-skipper
 - Check the intro is within the first 25% of the episode or first 10 minutes
 - If you migrated from an older version, try erasing all fingerprints in plugin settings and Run the "Detect and Analyze Media Segments" scheduled task
 
+## Does Intro Skipper work with read-only libraries?
+
+Yes! Intro Skipper fully supports read-only Jellyfin libraries. The fingerprint cache is stored in the server's data folder (`/config/data/introskipper`), not alongside your media files. This means the plugin can analyze and cache intro information without requiring write access to your media storage.
+
 ## Why is the skip button not visible?
 
 **For Jellyfin 10.10+:**
