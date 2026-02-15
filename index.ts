@@ -2,23 +2,38 @@ import {
   Client,
   Events,
   GatewayIntentBits,
+  Partials,
   inlineCode,
   type AutocompleteInteraction,
   type ChatInputCommandInteraction,
   type Message,
+  type MessageReaction,
+  type User,
+  type GuildMember,
+  type PartialMessageReaction,
+  type PartialUser,
 } from "discord.js";
 
 // Unicode emoji for thumbs up and thumbs down
 const THUMBS_UP = "👍";
 const THUMBS_DOWN = "👎";
+// Unicode emoji for question mark and green checkmark
+const QUESTION_MARK = "❓";
+const GREEN_CHECKMARK = "✅";
 import { askFAQ, formatCost, type FAQResult, getAvailableModels, getCurrentModel, setCurrentModel, type ModelInfo } from "./kilo";
 import { getSupportedVersions, formatSupportedVersions } from "./versions";
 
 // Channel name to listen for direct questions
 const SUPPORT_CHANNEL_NAME = "🤖support-bot";
 
+// Channel name for developer-triggered questions via reaction
+const SUPPORT_REACTION_CHANNEL_NAME = "🛠️support";
+
 // Role name that should be ignored in conversations
 const DEVELOPER_ROLE_NAME = "Developer";
+
+// Track messages being processed to prevent duplicate responses
+const processingMessages = new Set<string>();
 
 // Wrap URLs in inline code to suppress Discord embeds, but preserve channel mentions
 function suppressEmbeds(text: string): string {
@@ -56,6 +71,12 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessageReactions,
+  ],
+  partials: [
+    Partials.Message,
+    Partials.Reaction,
+    Partials.User,
   ],
 });
 
@@ -97,6 +118,74 @@ function hasDeveloperRole(message: Message): boolean {
   ) ?? false;
 }
 
+// Check if a guild member has the Developer role (for GuildMember)
+function memberHasDeveloperRole(member: GuildMember): boolean {
+  return member.roles.cache.some(
+    (role) => role.name === DEVELOPER_ROLE_NAME
+  );
+}
+
+// Handle question mark reactions in the support channel
+client.on(Events.MessageReactionAdd, async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
+  // Ignore bot reactions
+  if (user.bot) return;
+
+  // Only handle question mark reactions
+  if (reaction.emoji.name !== QUESTION_MARK) return;
+
+  // Fetch partial reactions
+  if (reaction.partial) {
+    try {
+      await reaction.fetch();
+    } catch (error) {
+      console.error("Could not fetch reaction:", error);
+      return;
+    }
+  }
+
+  // Fetch partial message if needed
+  if (reaction.message.partial) {
+    try {
+      await reaction.message.fetch();
+    } catch (error) {
+      console.error("Could not fetch message:", error);
+      return;
+    }
+  }
+
+  // Check if we're in a guild
+  if (!reaction.message.guild) return;
+
+  // Check if the channel is the support channel
+  const channel = reaction.message.channel;
+  if (!("name" in channel) || channel.name !== SUPPORT_REACTION_CHANNEL_NAME) return;
+
+  // Check if the user who reacted has the Developer role
+  const member = await reaction.message.guild.members.fetch(user.id);
+  if (!memberHasDeveloperRole(member)) return;
+
+  // Get the message content as the question
+  const question = reaction.message.content?.trim();
+  if (!question) return;
+
+  // Remove the question mark reaction and add a green checkmark
+  try {
+    await reaction.users.remove(user.id);
+  } catch (error) {
+    // This fails if bot lacks "Manage Messages" permission - non-critical
+    console.warn("Could not remove reaction (bot may lack 'Manage Messages' permission):", error);
+  }
+  
+  try {
+    await reaction.message.react(GREEN_CHECKMARK);
+  } catch (error) {
+    console.error("Could not add checkmark reaction:", error);
+  }
+
+  // Answer the question
+  await handleChannelQuestion(reaction.message as Message, question);
+});
+
 // Handle direct messages in the support channel
 client.on(Events.MessageCreate, async (message) => {
   // Ignore bot messages
@@ -130,6 +219,12 @@ client.on(Events.MessageCreate, async (message) => {
 });
 
 async function handleChannelQuestion(message: Message, question: string) {
+  // Prevent duplicate processing of the same message
+  if (processingMessages.has(message.id)) {
+    return;
+  }
+  processingMessages.add(message.id);
+
   try {
     // Show typing indicator while processing
     if ("sendTyping" in message.channel) {
@@ -157,6 +252,9 @@ async function handleChannelQuestion(message: Message, question: string) {
     await message.reply(
       "❌ Sorry, I encountered an error while processing your question. Please try again later."
     );
+  } finally {
+    // Clean up after processing (allow re-processing after 30 seconds)
+    setTimeout(() => processingMessages.delete(message.id), 30000);
   }
 }
 

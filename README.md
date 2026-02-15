@@ -29,20 +29,21 @@ In the Developer Portal under **Bot** → **Privileged Gateway Intents**, enable
 Use the following URL to invite the bot to your server (replace `YOUR_CLIENT_ID`):
 
 ```
-https://discord.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=2147552320&scope=bot%20applications.commands
+https://discord.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=2147560512&scope=bot%20applications.commands
 ```
 
-**Permissions Integer: `2147552320`**
+**Permissions Integer: `2147560512`**
 
 This includes the following permissions:
 
-| Permission               | Purpose                                       |
-| ------------------------ | --------------------------------------------- |
-| View Channels            | Read channel information                      |
-| Send Messages            | Send bot responses                            |
-| Read Message History     | Fetch referenced messages for reply detection |
-| Add Reactions            | Add 👍/👎 rating reactions to responses       |
-| Use Application Commands | Support slash commands                        |
+| Permission               | Purpose                                                  |
+| ------------------------ | -------------------------------------------------------- |
+| View Channels            | Read channel information                                 |
+| Send Messages            | Send bot responses                                       |
+| Manage Messages          | Remove ❓ reactions after processing in support channel  |
+| Read Message History     | Fetch referenced messages for reply detection            |
+| Add Reactions            | Add 👍/👎 rating reactions to responses                  |
+| Use Application Commands | Support slash commands                                   |
 
 ### 3. Configure environment variables
 
