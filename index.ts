@@ -57,7 +57,7 @@ function formatCostFooter(result: FAQResult): string {
   const cachedStr = result.tokens.cached > 0
     ? ` | cached: ${result.tokens.cached}`
     : "";
-  return `\n-# 🤖 ${result.model} | ${costStr} | tokens: ${result.tokens.total}${cachedStr}`;
+  return `\n-# 🤖 ${result.model} | ${costStr} | tokens: ${result.tokens.total}${cachedStr} | powered by [Kilo Open Source Sponsorship Program](https://kilo.ai)`;
 }
 
 // Load FAQ content at startup
