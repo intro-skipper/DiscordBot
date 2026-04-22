@@ -28,6 +28,15 @@ For more details, see the Installation Wiki at `https://github.com/intro-skipper
 - For Debian/Ubuntu: Install the `jellyfin-ffmpeg7` package
 - For MacOS: You need to build ffmpeg with chromaprint support (see wiki)
 
+## Why is the plugin failing to download or install?
+
+Plugin downloads are served via GitHub Releases. If you experience problems during installation (e.g. the plugin fails to download, times out, or the catalog shows an error), it may be caused by your location or IP address having limited access to GitHub's servers.
+
+Possible workarounds:
+
+- Try using a VPN to see if the issue is location-related
+- Try again later, as GitHub occasionally has regional availability issues
+
 ## Why is the plugin not showing in the catalog?
 
 - Reload without cache (CTRL + F5) for Windows/Linux or (SHIFT + CMD + R) for macOS
