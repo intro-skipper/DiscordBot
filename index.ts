@@ -44,8 +44,8 @@ function suppressEmbeds(text: string): string {
     return `__CHANNEL_MENTION_${channelMentions.length - 1}__`;
   });
 
-  // Suppress embeds for URLs
-  const suppressedText = textWithPlaceholders.replace(/(https?:\/\/[^\s<>]+)/g, (url) => inlineCode(url));
+  // Suppress embeds for URLs not already inside inline code
+  const suppressedText = textWithPlaceholders.replace(/(?<!`)(https?:\/\/[^\s<>`]+)/g, (url) => inlineCode(url));
 
   // Restore channel mentions
   return suppressedText.replace(/__CHANNEL_MENTION_(\d+)__/g, (_, index) => channelMentions[parseInt(index)] ?? "");
@@ -161,7 +161,13 @@ client.on(Events.MessageReactionAdd, async (reaction: MessageReaction | PartialM
   if (!("name" in channel) || channel.name !== SUPPORT_REACTION_CHANNEL_NAME) return;
 
   // Check if the user who reacted has the Developer role
-  const member = await reaction.message.guild.members.fetch(user.id);
+  let member;
+  try {
+    member = await reaction.message.guild.members.fetch(user.id);
+  } catch (error) {
+    console.error("Could not fetch guild member:", error);
+    return;
+  }
   if (!memberHasDeveloperRole(member)) return;
 
   // Get the message content as the question
@@ -234,15 +240,17 @@ async function handleChannelQuestion(message: Message, question: string) {
     // Use channel ID + user ID for conversation context
     const conversationId = `${message.channelId}-${message.author.id}`;
     const result = await askFAQ(faqContent, question, conversationId);
-    const response = suppressEmbeds(result.answer) + formatCostFooter(result);
+    const footer = formatCostFooter(result);
+    const truncationMarker = "...\n\n*(Response truncated)*";
+    const answerBudget = 1900 - footer.length - truncationMarker.length;
+    const answer = suppressEmbeds(result.answer);
+    const truncatedAnswer = answer.length > answerBudget
+      ? answer.substring(0, answerBudget) + truncationMarker
+      : answer;
+    const response = truncatedAnswer + footer;
 
-    // Discord has a 2000 character limit for messages
     let replyMessage: Message;
-    if (response.length > 1900) {
-      replyMessage = await message.reply(response.substring(0, 1900) + "...\n\n*(Response truncated)*");
-    } else {
-      replyMessage = await message.reply(response);
-    }
+    replyMessage = await message.reply(response);
 
     // Add thumbs up and thumbs down reactions for rating
     await replyMessage.react(THUMBS_UP);
@@ -268,15 +276,17 @@ async function handleAskCommand(interaction: ChatInputCommandInteraction) {
     // Use channel ID + user ID for conversation context
     const conversationId = `${interaction.channelId}-${interaction.user.id}`;
     const result = await askFAQ(faqContent, question, conversationId);
-    const response = suppressEmbeds(result.answer) + formatCostFooter(result);
+    const footer = formatCostFooter(result);
+    const truncationMarker = "...\n\n*(Response truncated)*";
+    const answerBudget = 1900 - footer.length - truncationMarker.length;
+    const answer = suppressEmbeds(result.answer);
+    const truncatedAnswer = answer.length > answerBudget
+      ? answer.substring(0, answerBudget) + truncationMarker
+      : answer;
+    const response = truncatedAnswer + footer;
 
-    // Discord has a 2000 character limit for messages
     let replyMessage: Message;
-    if (response.length > 1900) {
-      replyMessage = await interaction.editReply(response.substring(0, 1900) + "...\n\n*(Response truncated)*");
-    } else {
-      replyMessage = await interaction.editReply(response);
-    }
+    replyMessage = await interaction.editReply(response);
 
     // Add thumbs up and thumbs down reactions for rating
     await replyMessage.react(THUMBS_UP);

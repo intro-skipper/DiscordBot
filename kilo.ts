@@ -181,7 +181,7 @@ RULES:
 8. When mentioning the support channel, ALWAYS use the exact format <#1308018820618649630> - never say "support channel" or any other variation
 9. You can reference previous messages in the conversation to provide context-aware follow-up answers
 10. NEVER suggest users try accessing the manifest URL (https://intro-skipper.org/manifest.json) directly in a browser - it will not work because the server requires a Jellyfin server user agent. Only Jellyfin servers can fetch the manifest.
-11. When sharing URLs, put them in inline code using backticks (e.g., \`https://github.com/...\`) - do NOT use markdown link syntax like [text](url) as it will break in Discord.
+11. When sharing URLs, write them as plain URLs (e.g., https://github.com/...) - do NOT use markdown link syntax like [text](url) as it will break in Discord.
 
 SUPPORTED VERSIONS (LIVE DATA):
 ${versionInfo}
@@ -189,10 +189,10 @@ ${versionInfo}
 FAQ CONTENT:
 ${faqContent}`;
 
-  // Get or create conversation history
+  // Get or create conversation history (clone to avoid mutating the stored reference)
   let history: ChatMessage[] = [];
   if (conversationId) {
-    history = conversationHistory.get(conversationId) ?? [];
+    history = [...(conversationHistory.get(conversationId) ?? [])];
     conversationTimestamps.set(conversationId, Date.now());
   }
 
