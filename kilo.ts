@@ -11,7 +11,7 @@ const DATA_DIR = process.env.DATA_DIR ?? "/data";
 const MODEL_CONFIG_PATH = join(DATA_DIR, "model-config.json");
 
 // Default model from environment or fallback
-const DEFAULT_MODEL = process.env.KILO_MODEL ?? "anthropic/claude-haiku-4.5";
+const DEFAULT_MODEL = process.env.KILO_MODEL ?? "kilo-auto/free";
 
 // Load persisted model or use default
 function loadPersistedModel(): string {

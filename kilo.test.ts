@@ -21,7 +21,7 @@ describe("Model Filtering", () => {
 describe("FAQ Test with Free Model", () => {
   test("should answer FAQ question using a free model", async () => {
     // Use a free model for testing
-    const freeModel = "minimax/minimax-m2.1:free";
+    const freeModel = "kilo-auto/free";
     setCurrentModel(freeModel);
     
     const currentModel = getCurrentModel();
