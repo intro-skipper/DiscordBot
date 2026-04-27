@@ -323,6 +323,8 @@ ${versionInfo}
 }
 
 async function handleHelpCommand(interaction: ChatInputCommandInteraction) {
+  await interaction.deferReply();
+
   const helpMessage = `# Intro Skipper Support Bot 🎬
 
 I'm here to help answer your questions about the Intro Skipper plugin for Jellyfin!
@@ -342,16 +344,16 @@ I'm here to help answer your questions about the Intro Skipper plugin for Jellyf
 - 📖 Wiki: <https://github.com/intro-skipper/intro-skipper/wiki>
 - 🐛 Report issues: <https://github.com/intro-skipper/intro-skipper/issues>`;
 
-  await interaction.reply(helpMessage);
+  await interaction.editReply(helpMessage);
 }
 
 async function handleModelCommand(interaction: ChatInputCommandInteraction) {
   const newModel = interaction.options.getString("set");
 
+  await interaction.deferReply();
+
   // If no model provided, show current model and available models
   if (!newModel) {
-    await interaction.deferReply();
-
     try {
       const currentModel = getCurrentModel();
       const models = await getAvailableModels();
@@ -390,7 +392,7 @@ Use \`/model set:<model_id>\` to change the model.`;
 
   // Set new model
   setCurrentModel(newModel);
-  await interaction.reply(`✅ Model changed to: \`${newModel}\``);
+  await interaction.editReply(`✅ Model changed to: \`${newModel}\``);
 }
 
 // Cache for models to avoid repeated API calls
