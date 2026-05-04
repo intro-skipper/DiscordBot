@@ -90,3 +90,4 @@ bun run start  # Production
 ## Customizing the FAQ
 
 Edit `faq.md` to add or modify questions and answers. The bot reads this file at startup and uses AI to match user questions to relevant FAQ entries.
+
