@@ -224,6 +224,19 @@ client.on(Events.MessageCreate, async (message) => {
   await handleChannelQuestion(message, question);
 });
 
+// Adds the rating reactions to a delivered answer. Reactions are best-effort:
+// if the bot lacks the "Add Reactions" permission (or is rate limited), the
+// failure is logged but swallowed so it cannot fall through to the answer
+// error handlers, which would otherwise overwrite or duplicate a correct answer.
+async function addRatingReactions(message: Message): Promise<void> {
+  try {
+    await message.react(THUMBS_UP);
+    await message.react(THUMBS_DOWN);
+  } catch (error) {
+    console.error("Failed to add rating reactions:", error);
+  }
+}
+
 async function handleChannelQuestion(message: Message, question: string) {
   // Prevent duplicate processing of the same message
   if (processingMessages.has(message.id)) {
@@ -252,9 +265,11 @@ async function handleChannelQuestion(message: Message, question: string) {
     let replyMessage: Message;
     replyMessage = await message.reply(response);
 
-    // Add thumbs up and thumbs down reactions for rating
-    await replyMessage.react(THUMBS_UP);
-    await replyMessage.react(THUMBS_DOWN);
+    // Add thumbs up and thumbs down reactions for rating. Reactions are
+    // non-critical: a failure here (e.g. missing "Add Reactions" permission)
+    // must not fall through to the catch below and post a second, misleading
+    // error message after the answer was already delivered.
+    await addRatingReactions(replyMessage);
   } catch (error) {
     console.error("Error handling channel question:", error);
     await message.reply(
@@ -288,9 +303,11 @@ async function handleAskCommand(interaction: ChatInputCommandInteraction) {
     let replyMessage: Message;
     replyMessage = await interaction.editReply(response);
 
-    // Add thumbs up and thumbs down reactions for rating
-    await replyMessage.react(THUMBS_UP);
-    await replyMessage.react(THUMBS_DOWN);
+    // Add thumbs up and thumbs down reactions for rating. Reactions are
+    // non-critical: a failure here (e.g. missing "Add Reactions" permission)
+    // must not fall through to the catch below and overwrite the delivered
+    // answer with an error message via editReply.
+    await addRatingReactions(replyMessage);
   } catch (error) {
     console.error("Error handling ask command:", error);
     await interaction.editReply(
