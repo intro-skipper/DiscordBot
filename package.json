@@ -9,7 +9,7 @@
     "deploy-commands": "bun run deploy-commands.ts"
   },
   "dependencies": {
-    "discord.js": "^14.26.4"
+    "discord.js": "^14.26.5"
   },
   "devDependencies": {
     "@types/bun": "latest",
