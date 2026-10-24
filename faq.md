@@ -244,7 +244,7 @@ That task belongs to the separate **SkipMe.db** plugin (`https://github.com/intr
 
 ## Why does my config show "UseLegacyBlackFrameAnalyzer true" when I never changed it?
 
-Early Jellyfin 12 releases (before 12.0.3.0) converted the old 10.11 setting incorrectly when upgrading, so upgraded configs were switched to the legacy black frame analyzer even if you never touched it. Newer versions no longer do this, but the stored value stays.
+Intro Skipper versions for Jellyfin 12 before 12.0.3.0 converted the old 10.11 setting incorrectly when upgrading, so upgraded configs were switched to the legacy black frame analyzer even if you never touched it. Newer versions no longer do this, but the stored value stays.
 
 There is no checkbox for it in the UI, so you are not missing anything. To go back to the default (modern analyzer):
 
