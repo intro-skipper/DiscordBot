@@ -43,10 +43,11 @@ export async function getSupportedVersions(): Promise<SupportedVersion[]> {
   }
 
   const versions: SupportedVersion[] = [];
-  const jellyfinVersions = ["10.11", "10.10"];
+  const jellyfinVersions = ["12.0", "10.11", "10.10"];
+  const manifests = await Promise.all(jellyfinVersions.map(fetchManifest));
 
-  for (const jellyfinMajor of jellyfinVersions) {
-    const manifest = await fetchManifest(jellyfinMajor);
+  for (const [i, jellyfinMajor] of jellyfinVersions.entries()) {
+    const manifest = manifests[i];
     if (!manifest) continue;
 
     // Find the Intro Skipper plugin by name
@@ -68,8 +69,11 @@ export async function getSupportedVersions(): Promise<SupportedVersion[]> {
     }
   }
 
-  cachedVersions = versions;
-  lastFetch = Date.now();
+  // Don't cache a partial result, or a failed fetch hides that line for the whole TTL
+  if (manifests.every(Boolean)) {
+    cachedVersions = versions;
+    lastFetch = Date.now();
+  }
   return versions;
 }
 
