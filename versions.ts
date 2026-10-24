@@ -36,6 +36,9 @@ async function fetchManifest(
   }
 }
 
+// Supported Jellyfin lines, newest first; the first entry is the recommended upgrade target
+export const JELLYFIN_VERSIONS = ["12.0", "10.11", "10.10"];
+
 export async function getSupportedVersions(): Promise<SupportedVersion[]> {
   // Return cached versions if still valid
   if (cachedVersions && Date.now() - lastFetch < CACHE_TTL) {
@@ -43,10 +46,9 @@ export async function getSupportedVersions(): Promise<SupportedVersion[]> {
   }
 
   const versions: SupportedVersion[] = [];
-  const jellyfinVersions = ["12.0", "10.11", "10.10"];
-  const manifests = await Promise.all(jellyfinVersions.map(fetchManifest));
+  const manifests = await Promise.all(JELLYFIN_VERSIONS.map(fetchManifest));
 
-  for (const [i, jellyfinMajor] of jellyfinVersions.entries()) {
+  for (const [i, jellyfinMajor] of JELLYFIN_VERSIONS.entries()) {
     const manifest = manifests[i];
     if (!manifest) continue;
 

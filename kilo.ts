@@ -53,7 +53,7 @@ const CHEAP_FALLBACK_MODELS = [
 const BOT_TASK_ID = "intro-skipper-support-bot";
 
 import { X_KILOCODE_ORGANIZATIONID, X_KILOCODE_PROJECTID, X_KILOCODE_TASKID, X_TITLE } from "./headers";
-import { getSupportedVersions, formatSupportedVersions } from "./versions";
+import { getSupportedVersions, formatSupportedVersions, JELLYFIN_VERSIONS } from "./versions";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -182,6 +182,7 @@ RULES:
 9. You can reference previous messages in the conversation to provide context-aware follow-up answers
 10. NEVER suggest users try accessing the manifest URL (https://intro-skipper.org/manifest.json) directly in a browser - it will not work because the server requires a Jellyfin server user agent. Only Jellyfin servers can fetch the manifest.
 11. When sharing URLs, write them as plain URLs (e.g., https://github.com/...) - do NOT use markdown link syntax like [text](url) as it will break in Discord.
+12. Whenever an answer involves updating or upgrading Jellyfin (an unsupported or old Jellyfin version, a missing plugin in the catalog, NotSupported status, version questions), recommend upgrading to the newest Jellyfin ${JELLYFIN_VERSIONS[0]} release with the matching Intro Skipper plugin. When recommending a move to a new major Jellyfin version, remind users to back up their Jellyfin config first and check that their other plugins support it. Mention staying on an older line only as a fallback.
 
 SUPPORTED VERSIONS (LIVE DATA):
 ${versionInfo}

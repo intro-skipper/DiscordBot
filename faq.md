@@ -50,7 +50,9 @@ If the settings page is blank inside a desktop, mobile or TV app, open the dashb
 
 Yes. Intro Skipper has its own release line for Jellyfin 12 (plugin versions 12.0.x.x). Add the normal manifest URL `https://intro-skipper.org/manifest.json` on a Jellyfin 12 server and the catalog will offer the 12.x build. See the supported versions for the current release.
 
-Always install the plugin release that matches your Jellyfin **major** version, and keep Jellyfin on the newest minor version of that line.
+**Recommended:** upgrade to the newest Jellyfin 12 release and use the Intro Skipper 12.x plugin. That is where new features and fixes land. Before moving to a new major Jellyfin version, back up your Jellyfin config and check that your other plugins support it.
+
+Always install the plugin release that matches your Jellyfin **major** version. If you stay on an older line for now, keep Jellyfin on the newest minor version of that line.
 
 ## Why does the plugin show "NotSupported" or fail to load after updating Jellyfin?
 
@@ -58,7 +60,7 @@ The installed plugin version was built for a different Jellyfin version. The log
 
 This typically happens after moving to a new Jellyfin major version (for example from 10.11 to 12, or to a nightly build) while keeping the old plugin. To fix it:
 
-- Update Jellyfin to the newest minor version of its line
+- Update Jellyfin (upgrading to the newest major release is recommended)
 - Uninstall the old Intro Skipper version and install the one the catalog offers for your server
 - If Jellyfin does not start at all, remove the Intro Skipper folder from `/config/plugins/` (or `/config/data/plugins/`), start Jellyfin and reinstall from the catalog
 
@@ -79,9 +81,9 @@ Possible workarounds:
 
 - Reload without cache (CTRL + F5) for Windows/Linux or (SHIFT + CMD + R) for macOS
 - Make sure you're using the correct URL: `https://intro-skipper.org/manifest.json`
-- Check if your Jellyfin version is supported (see supported versions) - you need the newest minor version of your Jellyfin line
+- Check if your Jellyfin version is supported (see supported versions) - upgrading to the newest major Jellyfin release is recommended
 - Try restarting Jellyfin after adding the repository
-- **If you only see "Chapter Creator", "EDL Creator", "Segment Editor" or "SkipMe.db" but not "Intro Skipper", your Jellyfin version is too old** - update Jellyfin to a supported version to see the main Intro Skipper plugin
+- **If you only see "Chapter Creator", "EDL Creator", "Segment Editor" or "SkipMe.db" but not "Intro Skipper", your Jellyfin version is too old** - update Jellyfin (ideally to the newest major release) to see the main Intro Skipper plugin
 
 ## Which clients are supported?
 
